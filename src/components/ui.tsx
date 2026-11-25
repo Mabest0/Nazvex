@@ -231,7 +231,7 @@ export function ConnectGate({ children }: { children: ReactNode }) {
           )}
         </ConnectKitButton.Custom>
       }
-      note="Wallet not connecting here? Some browser extensions cannot connect inside an embedded preview. Try Coinbase Wallet in the picker, or open the deployed app in its own tab."
+      note={window.self !== window.top ? 'Wallet not connecting in this preview? Some browser extensions cannot connect inside an embedded preview. Try Coinbase Wallet in the picker, or open the deployed app in its own tab.' : undefined}
     />
   )
 }
