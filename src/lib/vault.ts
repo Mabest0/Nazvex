@@ -1,10 +1,11 @@
-import type { Address } from 'viem'
+import { isAddress, type Address } from 'viem'
 import { arcTestnet } from 'viem/chains'
 import { getUsdc, requireChain } from '@/onchain-facts'
 
 export const CHAIN_ID = arcTestnet.id
 export const CHAIN = requireChain(CHAIN_ID)
 export const VAULT_ADDRESS = import.meta.env.VITE_NEXORA_VAULT_ADDRESS as Address
+export const CONFIG_OK = isAddress(String(VAULT_ADDRESS ?? ''))
 export const VAULT_DEPLOY_TX = import.meta.env.VITE_NEXORA_VAULT_DEPLOY_TX as string | undefined
 
 const usdcFact = getUsdc(CHAIN_ID)

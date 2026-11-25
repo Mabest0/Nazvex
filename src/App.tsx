@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { CONFIG_OK } from '@/lib/vault'
 import { NexoraProvider } from '@/hooks/NexoraProvider'
 import { Shell, type SectionId } from '@/components/Shell'
 import { Overview } from '@/components/sections/Overview'
@@ -17,6 +18,19 @@ export interface NavProps {
   focusAgent?: bigint
 }
 
+function MissingConfig() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center p-6">
+      <div className="card max-w-md p-8 text-center">
+        <h1 className="display text-2xl font-bold">Vault address missing</h1>
+        <p className="mt-2 text-pretty text-sm" style={{ color: 'var(--subtle)' }}>
+          Set <span className="mono">VITE_NEXORA_VAULT_ADDRESS</span> in the host&apos;s environment variables (or in <span className="mono">.env.production</span>) and rebuild.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [section, setSection] = useState<SectionId>('overview')
   const [focusAgent, setFocusAgent] = useState<bigint | undefined>()
@@ -28,6 +42,8 @@ export default function App() {
   }, [])
 
   const nav: NavProps = { go, focusAgent }
+
+  if (!CONFIG_OK) return <MissingConfig />
 
   return (
     <NexoraProvider>
