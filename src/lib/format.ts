@@ -78,3 +78,7 @@ export function parseOnchainError(error: unknown): string | null {
   if (message.includes('network') || message.includes('timeout')) return 'Network issue. Check your connection and retry.'
   return 'Something went wrong. Please try again.'
 }
+
+export function toneFor(pctUsed: number): 'accent' | 'warn' | 'danger' {
+  return pctUsed >= 95 ? 'danger' : pctUsed >= 80 ? 'warn' : 'accent'
+}

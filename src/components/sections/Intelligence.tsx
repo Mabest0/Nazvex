@@ -7,10 +7,10 @@ import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
 import { useNexora } from '@/hooks/NexoraProvider'
 import { useTx } from '@/hooks/useTx'
 import { answer, SUGGESTIONS, type Proposal, type Reply } from '@/lib/assistant'
-import { fmtUsdc, pct } from '@/lib/format'
+import { fmtUsdc, pct, toneFor } from '@/lib/format'
 import { spendByDay } from '@/lib/monitoring'
 import { USDC_ADDRESS, VAULT_ADDRESS } from '@/lib/vault'
-import { ConnectGate, PageHeader, ProgressBar, Spinner, toneFor } from '../ui'
+import { ConnectGate, PageHeader, ProgressBar, Spinner } from '../ui'
 
 interface Message {
   role: 'user' | 'assistant'

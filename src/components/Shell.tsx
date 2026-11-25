@@ -58,7 +58,7 @@ export function Shell({ section, onNavigate, children }: { section: SectionId; o
 
   return (
     <div className="min-h-dvh">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r px-4 py-6 lg:flex" style={{ borderColor: 'var(--border)', background: 'rgba(13,27,47,0.7)', backdropFilter: 'blur(16px)' }}>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r px-4 py-6 lg:flex" style={{ borderColor: 'var(--border)', background: '#0d1b2f' }}>
         <div className="px-2">
           <Logo />
           <p className="mt-2 text-xs" style={{ color: 'var(--subtle)' }}>

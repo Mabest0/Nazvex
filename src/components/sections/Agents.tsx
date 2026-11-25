@@ -4,10 +4,10 @@ import type { NavProps } from '@/App'
 import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
 import { useNexora } from '@/hooks/NexoraProvider'
 import { useTx } from '@/hooks/useTx'
-import { fmtDate, fmtUsdc, pct } from '@/lib/format'
+import { fmtDate, fmtUsdc, pct, toneFor } from '@/lib/format'
 import { AgentStatus, VAULT_ADDRESS, type Agent } from '@/lib/vault'
 import { RegisterAgentModal } from '../RegisterAgentModal'
-import { AddressChip, AgentStatusPill, ConnectGate, Empty, Modal, PageHeader, ProgressBar, Spinner, toneFor } from '../ui'
+import { AddressChip, AgentStatusPill, ConnectGate, Empty, Modal, PageHeader, ProgressBar, Spinner } from '../ui'
 
 export function Agents({ go }: NavProps) {
   const { agents, loading } = useNexora()

@@ -75,10 +75,6 @@ export function ProgressBar({ value, tone = 'accent' }: { value: number; tone?: 
   )
 }
 
-export function toneFor(pctUsed: number): 'accent' | 'warn' | 'danger' {
-  return pctUsed >= 95 ? 'danger' : pctUsed >= 80 ? 'warn' : 'accent'
-}
-
 export function Field({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <label className="block">

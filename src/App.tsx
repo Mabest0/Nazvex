@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { NexoraProvider } from '@/hooks/NexoraProvider'
 import { Shell, type SectionId } from '@/components/Shell'
 import { Overview } from '@/components/sections/Overview'
@@ -31,6 +32,7 @@ export default function App() {
   return (
     <NexoraProvider>
       <Shell section={section} onNavigate={(s) => go(s)}>
+        <ErrorBoundary key={section} label={section}>
         {section === 'overview' && <Overview {...nav} />}
         {section === 'agents' && <Agents {...nav} />}
         {section === 'wallets' && <Wallets {...nav} />}
@@ -40,6 +42,7 @@ export default function App() {
         {section === 'intelligence' && <Intelligence {...nav} />}
         {section === 'security' && <Security {...nav} />}
         {section === 'settings' && <Settings {...nav} />}
+        </ErrorBoundary>
       </Shell>
     </NexoraProvider>
   )
