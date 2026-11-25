@@ -10,11 +10,14 @@
  *   bun run agent status  --agent 1
  *   bun run agent request --agent 1 --to 0x... --amount 3 --purpose "API credits"
  *   bun run agent result  --request 7
+ *   bun run agent wait    --request 7 [--timeout 600]      blocks until the owner decides
+ *   bun run agent watch   --agent 1 [--webhook https://...] live events for the agent
  *
  * Environment:
  *   AGENT_PRIVATE_KEY           the agent wallet's key (required for `request`; never the owner's key)
  *   VITE_NEXORA_VAULT_ADDRESS   vault address (already set in .env / .env.production)
- *   AGENT_RPC_URL               optional; defaults to the public Arc Testnet RPC
+ *   AGENT_RPC_URL               optional RPC endpoint; defaults to the public Arc Testnet RPC
+ *   AGENT_WEBHOOK_SECRET        optional; signs webhook bodies (header x-nazvex-signature, HMAC-SHA256)
  */
 import { parseArgs } from 'node:util'
 import {
@@ -31,6 +34,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
 import { nexoraVaultAbi } from '../src/contracts/nexoraVaultAbi'
 import { requireChain } from '../src/onchain-facts'
+import { runWait, runWatch, type WatchContext } from './agent-watch'
 
 const CHAIN = requireChain(arcTestnet.id)
 const REASONS = [
@@ -54,13 +58,24 @@ const { positionals, values } = parseArgs({
     purpose: { type: 'string', default: '' },
     request: { type: 'string' },
     json: { type: 'boolean', default: false },
+    webhook: { type: 'string' },
+    interval: { type: 'string' },
+    lookback: { type: 'string' },
+    timeout: { type: 'string' },
   },
 })
 
 const vaultAddress = process.env.VITE_NEXORA_VAULT_ADDRESS
 if (!vaultAddress || !isAddress(vaultAddress)) fail('VITE_NEXORA_VAULT_ADDRESS is missing or invalid.')
 const vault = vaultAddress
-const rpcUrl = process.env.AGENT_RPC_URL ?? CHAIN.rpcUrls[0]
+// RPC order: explicit override, then the sandbox RPC proxy for this chain, then the public endpoint.
+const proxyChains = (process.env.RPC_PROXY_CHAINS ?? '').split(',')
+const rpcUrl =
+  process.env.AGENT_RPC_URL ??
+  process.env.RPC_URL_Arc_Testnet ??
+  (process.env.RPC_PROXY_BASE_URL && proxyChains.includes('Arc_Testnet')
+    ? `${process.env.RPC_PROXY_BASE_URL}/api/rpc/Arc_Testnet?_rpc_token=${process.env.RPC_PROXY_TOKEN}`
+    : CHAIN.rpcUrls[0])
 const publicClient = createPublicClient({ chain: arcTestnet, transport: http(rpcUrl) })
 const usdc = (raw: bigint) => `${formatUnits(raw, 6)} USDC`
 
@@ -174,12 +189,34 @@ async function result() {
   out(`request #${r.id}: ${state}${detail}. ${usdc(r.amount)} to ${r.to}`, { requestId: r.id, status: state, reason: REASONS[r.reason], amount: r.amount, to: r.to })
 }
 
+function watchContext(): WatchContext {
+  return {
+    client: publicClient,
+    vault,
+    agentId: values.agent ? agentId() : 0n,
+    json: values.json,
+    fail,
+    option: (name) => (values as Record<string, string | boolean | undefined>)[name] as string | undefined,
+  }
+}
+
+async function wait() {
+  if (!values.request || !/^\d+$/.test(values.request)) fail('Pass --request <id>.')
+  const outcome = await runWait(watchContext(), BigInt(values.request))
+  process.exit(outcome.status === 'executed' ? 0 : 2)
+}
+
 const command = positionals[0]
 try {
   if (command === 'status') await status()
   else if (command === 'request') await request()
   else if (command === 'result') await result()
-  else fail('Usage: bun run agent <status|request|result> [options]. See docs/connect-an-agent.md.')
+  else if (command === 'wait') await wait()
+  else if (command === 'watch') {
+    agentId()
+    await runWatch(watchContext())
+  }
+  else fail('Usage: bun run agent <status|request|result|wait|watch> [options]. See docs/connect-an-agent.md.')
 } catch (error) {
   fail(friendly(error))
 }

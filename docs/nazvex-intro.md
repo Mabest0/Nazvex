@@ -80,6 +80,8 @@ Any bot, service or agent framework can submit requests through the agent client
 bun run agent status  --agent 1
 bun run agent request --agent 1 --to 0x... --amount 3 --purpose "API credits"
 bun run agent result  --request 7
+bun run agent wait    --request 7        # waits for your decision
+bun run agent watch   --agent 1 --webhook https://your-service/nazvex
 ```
 
 The agent keeps its own key, and the vault enforces the owner's policy no matter what the agent does. Full guide with Node, Python and tool-calling examples: `docs/connect-an-agent.md`.
@@ -95,7 +97,7 @@ The agent keeps its own key, and the vault enforces the owner's policy no matter
 - Testnet and test USDC only. Not for real funds.
 - The assistant uses fixed rules over your recorded data, not a language model, so it only understands the question styles listed in its suggestions.
 - There is no backend or database yet. Everything is read straight from the chain.
-- Agents connect today through a ready-made client (`bun run agent`, see `docs/connect-an-agent.md`) that submits requests from the agent's own wallet and reports whether each one executed, is pending or was blocked. Still to come: automatic notifications when you approve a request, which needs a small backend.
+- Agents connect today through a ready-made client (`bun run agent`, see `docs/connect-an-agent.md`) that submits requests from the agent's own wallet and reports whether each one executed, is pending or was blocked. Agents also get live updates: `bun run agent watch` streams every approval, decline, block and policy change and can send each one to a webhook, and `bun run agent wait` pauses an agent until you decide on a pending request.
 - Not yet covered: mainnet, crosschain payments, autonomous trading and advanced anomaly detection.
 
 ## One-line pitches

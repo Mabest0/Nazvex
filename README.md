@@ -11,7 +11,7 @@ Built with [Arc Studio](https://studio.arc.io)
 - Pause, resume or permanently revoke an agent; withdraw unspent funds at any time
 - Payment requests that execute, wait for your approval, or are blocked with a recorded reason
 - Approval queue, activity history, spending insights and a Security Center with transparent alert rules
-- A command-line agent client so bots and agent software can request payments from their own wallet (see `docs/connect-an-agent.md`)
+- A command-line agent client so bots and agent software can request payments from their own wallet and get live updates (including webhooks) when you approve, decline or block them (see `docs/connect-an-agent.md`)
 - A plain-language assistant that answers questions and prepares changes for you to confirm
 
 ## Tech stack
@@ -33,7 +33,7 @@ Other commands:
 bun run check            # lint and typecheck
 bun run contracts:build  # compile contracts
 bun run contracts:test   # run contract tests
-bun run agent            # agent client: status, request, result
+bun run agent            # agent client: status, request, result, wait, watch
 ```
 
 ### Environment variables
@@ -42,6 +42,8 @@ bun run agent            # agent client: status, request, result
 - `VITE_NEXORA_VAULT_DEPLOY_TX`: deployment transaction hash (optional, shown in the app).
 - `AGENT_PRIVATE_KEY`: the agent wallet's key, used only by the agent client. Keep it out of the repository.
 - `AGENT_RPC_URL`: optional RPC endpoint for the agent client.
+- `AGENT_WEBHOOK_SECRET`: optional; signs the webhook calls sent by `bun run agent watch`.
+- `RPC_URL_Arc_Testnet`: optional RPC override for backend scripts.
 - `RPC_PROXY_BASE_URL`, `RPC_PROXY_TOKEN`, `RPC_PROXY_CHAINS`: provisioned by Arc Studio, optional elsewhere.
 
 ## Testnet only
