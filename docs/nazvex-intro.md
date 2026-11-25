@@ -97,7 +97,7 @@ The agent keeps its own key, and the vault enforces the owner's policy no matter
 - Testnet and test USDC only. Not for real funds.
 - The assistant uses fixed rules over your recorded data, not a language model, so it only understands the question styles listed in its suggestions.
 - There is no backend or database yet. Everything is read straight from the chain.
-- Agents connect today through a ready-made client (`bun run agent`, see `docs/connect-an-agent.md`) that submits requests from the agent's own wallet and reports whether each one executed, is pending or was blocked. Agents also get live updates: `bun run agent watch` streams every approval, decline, block and policy change and can send each one to a webhook, and `bun run agent wait` pauses an agent until you decide on a pending request.
+- Agent live updates work by checking the chain every few seconds, so a notification can arrive a few seconds late, and the watcher has to be running on the agent's side. A push straight from Nazvex would need a hosted backend.
 - Not yet covered: mainnet, crosschain payments, autonomous trading and advanced anomaly detection.
 
 ## One-line pitches
