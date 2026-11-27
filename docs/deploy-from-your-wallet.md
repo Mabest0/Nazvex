@@ -2,7 +2,13 @@
 
 This puts your own address on the explorer as the contract's creator. It uses your browser wallet and Remix, a free browser tool for compiling and deploying contracts. You need a little Arc Testnet USDC in the wallet for gas.
 
-The source in `docs/remix/NazvexVault.flat.sol` is the same contract as `contracts/NazvexVault.sol`, joined into one file so Remix needs no other downloads. It compiles to the same code as the repo version (checked), and all 99 tests pass on the repo version.
+Use `docs/remix/NazvexVault.remix.sol` (about 470 lines). It is the same contract as `contracts/NazvexVault.sol`, with the library imports pinned to the exact version the tests ran on, so Remix downloads them itself. It compiles to the same code as the repo version (checked), and all 99 tests pass on the repo version.
+
+If Remix can't download the libraries, use `docs/remix/NazvexVault.flat.sol` instead. It is the same contract in one 5,000-line file with nothing to download.
+
+**Fastest way to load it:** once the repo is pushed, open this link and Remix loads the file for you, with nothing to copy:
+
+`https://remix.ethereum.org/#url=https://github.com/Mabest0/Nazvex/blob/main/docs/remix/NazvexVault.remix.sol`
 
 ## Before you start
 
@@ -13,7 +19,7 @@ The source in `docs/remix/NazvexVault.flat.sol` is the same contract as `contrac
 ## Steps
 
 1. Open https://remix.ethereum.org.
-2. In the file explorer, create a new file named `NazvexVault.sol`, and paste in the full contents of `docs/remix/NazvexVault.flat.sol`.
+2. Load the file: use the link above, or create a new file named `NazvexVault.sol` in Remix and paste in the full contents of `docs/remix/NazvexVault.remix.sol`.
 3. Open the **Solidity compiler** tab and set:
    - Compiler: **0.8.28**
    - Open **Advanced Configurations**, set **EVM version** to **cancun**
