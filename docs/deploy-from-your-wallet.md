@@ -1,16 +1,8 @@
 # Deploy NazvexVault from your own wallet
 
-## On a phone: one-tap deploy page (easiest)
+## On a phone
 
-The app has a built-in deploy page at `/?deploy=1`. It deploys NazvexVault from the wallet you connect, so that wallet is the creator.
-
-1. Push the latest commits and let your host redeploy the site.
-2. On your phone, open your wallet app (MetaMask or Coinbase Wallet) and use its built-in **Browser**.
-3. Go to `https://<your-site>/?deploy=1`.
-4. Tap **Connect wallet** and choose your wallet. The page switches it to Arc Testnet.
-5. Make sure the wallet has a little test USDC for gas.
-6. Tap **Deploy NazvexVault** and confirm in your wallet.
-7. Copy the **contract address** and **transaction hash** it shows, and send them to Arc Studio chat.
+The NazvexVault now in use was deployed from a phone with a one-tap page inside the app (it has since been removed). To deploy another copy, use Remix in a mobile browser that supports wallet extensions (for example Mises), following the steps below.
 
 ## On a computer: Remix
 

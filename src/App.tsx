@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react'
-import { DeployVault } from '@/components/DeployVault'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { CONFIG_OK } from '@/lib/vault'
 import { NazvexProvider } from '@/hooks/NazvexProvider'
@@ -44,7 +43,6 @@ export default function App() {
 
   const nav: NavProps = { go, focusAgent }
 
-  if (new URLSearchParams(window.location.search).has('deploy')) return <DeployVault />
   if (!CONFIG_OK) return <MissingConfig />
 
   return (
