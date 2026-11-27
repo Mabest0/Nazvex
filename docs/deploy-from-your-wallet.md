@@ -6,7 +6,7 @@ Use `docs/remix/NazvexVault.remix.sol` (about 470 lines). It is the same contrac
 
 If Remix can't download the libraries, use `docs/remix/NazvexVault.flat.sol` instead. It is the same contract in one 5,000-line file with nothing to download.
 
-**Fastest way to load it:** once the repo is pushed, open this link and Remix loads the file for you, with nothing to copy:
+**Fastest way to load it (only if the GitHub repo is public and pushed):** open this link and Remix loads the file for you, with nothing to copy:
 
 `https://remix.ethereum.org/#url=https://github.com/Mabest0/Nazvex/blob/main/docs/remix/NazvexVault.remix.sol`
 
