@@ -1,4 +1,4 @@
-export const nexoraVaultAbi = [
+export const nazvexVaultAbi = [
   {
     "type": "constructor",
     "inputs": [
@@ -164,7 +164,7 @@ export const nexoraVaultAbi = [
       {
         "name": "result",
         "type": "tuple",
-        "internalType": "struct NexoraVault.AgentView",
+        "internalType": "struct NazvexVault.AgentView",
         "components": [
           {
             "name": "id",
@@ -189,7 +189,7 @@ export const nexoraVaultAbi = [
           {
             "name": "status",
             "type": "uint8",
-            "internalType": "enum NexoraVault.AgentStatus"
+            "internalType": "enum NazvexVault.AgentStatus"
           },
           {
             "name": "balance",
@@ -224,7 +224,7 @@ export const nexoraVaultAbi = [
           {
             "name": "policy",
             "type": "tuple",
-            "internalType": "struct NexoraVault.Policy",
+            "internalType": "struct NazvexVault.Policy",
             "components": [
               {
                 "name": "maxPerTx",
@@ -324,7 +324,7 @@ export const nexoraVaultAbi = [
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct NexoraVault.PaymentRequest",
+        "internalType": "struct NazvexVault.PaymentRequest",
         "components": [
           {
             "name": "id",
@@ -354,12 +354,12 @@ export const nexoraVaultAbi = [
           {
             "name": "status",
             "type": "uint8",
-            "internalType": "enum NexoraVault.RequestStatus"
+            "internalType": "enum NazvexVault.RequestStatus"
           },
           {
             "name": "reason",
             "type": "uint8",
-            "internalType": "enum NexoraVault.BlockReason"
+            "internalType": "enum NazvexVault.BlockReason"
           },
           {
             "name": "createdAt",
@@ -442,7 +442,7 @@ export const nexoraVaultAbi = [
       {
         "name": "reason",
         "type": "uint8",
-        "internalType": "enum NexoraVault.BlockReason"
+        "internalType": "enum NazvexVault.BlockReason"
       },
       {
         "name": "needsApproval",
@@ -469,7 +469,7 @@ export const nexoraVaultAbi = [
       {
         "name": "policy",
         "type": "tuple",
-        "internalType": "struct NexoraVault.Policy",
+        "internalType": "struct NazvexVault.Policy",
         "components": [
           {
             "name": "maxPerTx",
@@ -573,7 +573,7 @@ export const nexoraVaultAbi = [
       {
         "name": "status",
         "type": "uint8",
-        "internalType": "enum NexoraVault.RequestStatus"
+        "internalType": "enum NazvexVault.RequestStatus"
       }
     ],
     "stateMutability": "nonpayable"
@@ -634,7 +634,7 @@ export const nexoraVaultAbi = [
       {
         "name": "policy",
         "type": "tuple",
-        "internalType": "struct NexoraVault.Policy",
+        "internalType": "struct NazvexVault.Policy",
         "components": [
           {
             "name": "maxPerTx",
@@ -763,7 +763,7 @@ export const nexoraVaultAbi = [
         "name": "status",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum NexoraVault.AgentStatus"
+        "internalType": "enum NazvexVault.AgentStatus"
       }
     ],
     "anonymous": false
@@ -844,7 +844,7 @@ export const nexoraVaultAbi = [
         "name": "reason",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum NexoraVault.BlockReason"
+        "internalType": "enum NazvexVault.BlockReason"
       }
     ],
     "anonymous": false

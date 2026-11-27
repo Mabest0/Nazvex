@@ -7,7 +7,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { formatUnits, parseEventLogs, type Address, type PublicClient } from 'viem'
-import { nexoraVaultAbi } from '../src/contracts/nexoraVaultAbi'
+import { nazvexVaultAbi } from '../src/contracts/nazvexVaultAbi'
 
 const BATCH_BLOCKS = 2000n
 const REASONS = ['None', 'Agent is not active', 'Budget expired', 'Exceeds per-transaction limit', 'Exceeds daily limit', 'Recipient not on allowlist', 'Insufficient vault balance']
@@ -39,7 +39,7 @@ export interface AgentEvent {
 const usdc = (raw: bigint) => `${formatUnits(raw, 6)} USDC`
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-function toAgentEvent(log: ReturnType<typeof parseEventLogs<typeof nexoraVaultAbi>>[number], at: string): AgentEvent | null {
+function toAgentEvent(log: ReturnType<typeof parseEventLogs<typeof nazvexVaultAbi>>[number], at: string): AgentEvent | null {
   const base = {
     blockNumber: String(log.blockNumber),
     txHash: log.transactionHash,
@@ -165,7 +165,7 @@ export async function runWatch(ctx: WatchContext): Promise<void> {
           console.error(`Catching up: ${head - next} blocks behind the chain head. Events below may be older than now.`)
         }
         const raw = await ctx.client.getLogs({ address: ctx.vault, fromBlock: next, toBlock: to })
-        const parsed = parseEventLogs({ abi: nexoraVaultAbi, logs: raw })
+        const parsed = parseEventLogs({ abi: nazvexVaultAbi, logs: raw })
         for (const log of parsed) {
           if (!('agentId' in log.args) || String(log.args.agentId) !== String(ctx.agentId)) continue
           const event = toAgentEvent(log, await timeOf(log.blockNumber))
@@ -190,7 +190,7 @@ export async function runWait(ctx: WatchContext, requestId: bigint): Promise<{ s
   const timeoutSec = Number(ctx.option('timeout') ?? 0)
   const started = Date.now()
   for (;;) {
-    const r = await ctx.client.readContract({ address: ctx.vault, abi: nexoraVaultAbi, functionName: 'getRequest', args: [requestId] })
+    const r = await ctx.client.readContract({ address: ctx.vault, abi: nazvexVaultAbi, functionName: 'getRequest', args: [requestId] })
     const status = REQUEST_STATUS[r.status]
     const expired = r.status === 0 && BigInt(Math.floor(Date.now() / 1000)) >= r.expiresAt
     if (r.status !== 0 || expired) {

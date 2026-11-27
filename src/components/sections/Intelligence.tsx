@@ -3,8 +3,8 @@ import { erc20Abi } from 'viem'
 import { toast } from 'sonner'
 import { Bot, Check, Send, Sparkles } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { useTx } from '@/hooks/useTx'
 import { answer, SUGGESTIONS, type Proposal, type Reply } from '@/lib/assistant'
 import { fmtUsdc, pct, toneFor } from '@/lib/format'
@@ -26,7 +26,7 @@ const WELCOME: Message = {
 }
 
 export function Intelligence(_props: NavProps) {
-  const { agents, requests, now, usdcBalance, allowance } = useNexora()
+  const { agents, requests, now, usdcBalance, allowance } = useNazvex()
   const tx = useTx()
   const [messages, setMessages] = useState<Message[]>([WELCOME])
   const [input, setInput] = useState('')
@@ -57,7 +57,7 @@ export function Intelligence(_props: NavProps) {
   const confirm = async (index: number, p: Proposal) => {
     let ok = false
     if (p.kind === 'setPolicy') {
-      ok = !!(await tx.run('Update policy', () => tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'setPolicy', args: [p.agent.id, p.policy] })))
+      ok = !!(await tx.run('Update policy', () => tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'setPolicy', args: [p.agent.id, p.policy] })))
     } else if (p.kind === 'fund') {
       if (usdcBalance < p.amount) {
         toast.error('Your wallet does not hold enough USDC for this.')
@@ -67,12 +67,12 @@ export function Intelligence(_props: NavProps) {
         const approved = await tx.run('Approve USDC', () => tx.write({ address: USDC_ADDRESS, abi: erc20Abi, functionName: 'approve', args: [VAULT_ADDRESS, p.amount] }))
         if (!approved) return
       }
-      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'fundAgent', args: [p.agent.id, p.amount] })))
+      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'fundAgent', args: [p.agent.id, p.amount] })))
     } else if (p.kind === 'withdraw') {
-      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'withdrawFromAgent', args: [p.agent.id, p.amount] })))
+      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'withdrawFromAgent', args: [p.agent.id, p.amount] })))
     } else {
       const fn = p.kind === 'pause' ? 'pauseAgent' : 'resumeAgent'
-      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: fn, args: [p.agent.id] })))
+      ok = !!(await tx.run(p.summary, () => tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: fn, args: [p.agent.id] })))
     }
     if (ok) setState(index, 'done')
   }

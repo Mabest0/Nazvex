@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { erc20Abi } from 'viem'
 import { ArrowDownToLine, ArrowUpFromLine, Vault } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { useTx } from '@/hooks/useTx'
 import { fmtUsdc } from '@/lib/format'
 import { formatUnitsExact, parseUsdc } from '@/onchain-money'
@@ -22,7 +22,7 @@ function safeParse(v: string): bigint | null {
 }
 
 export function Wallets({ go, focusAgent }: NavProps) {
-  const { agents, usdcBalance, allowance, loading } = useNexora()
+  const { agents, usdcBalance, allowance, loading } = useNazvex()
   const [action, setAction] = useState<{ mode: Mode; agent: Agent } | null>(null)
   const [amount, setAmount] = useState('')
   const tx = useTx()
@@ -48,12 +48,12 @@ export function Wallets({ go, focusAgent }: NavProps) {
         if (!approved) return
       }
       const done = await tx.run(`Fund ${agent.name}`, () =>
-        tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'fundAgent', args: [agent.id, raw] }),
+        tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'fundAgent', args: [agent.id, raw] }),
       )
       if (done) close()
     } else {
       const done = await tx.run(`Withdraw from ${agent.name}`, () =>
-        tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'withdrawFromAgent', args: [agent.id, raw] }),
+        tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'withdrawFromAgent', args: [agent.id, raw] }),
       )
       if (done) close()
     }

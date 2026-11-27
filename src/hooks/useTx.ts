@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react'
 import { parseEventLogs, type Hash, type TransactionReceipt } from 'viem'
 import { useAccount, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi'
 import { toast } from 'sonner'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
 import { buildTxExplorerUrl } from '@/onchain-facts'
 import { parseOnchainError } from '@/lib/format'
 import { CHAIN_ID, VAULT_ADDRESS } from '@/lib/vault'
-import { useNexora } from './NexoraProvider'
+import { useNazvex } from './NazvexProvider'
 
 export type TxPhase = 'idle' | 'wallet' | 'confirming'
 
@@ -24,7 +24,7 @@ export type PaymentOutcome =
 export function paymentOutcome(receipt: TransactionReceipt): PaymentOutcome | null {
   const logs = receipt.logs.filter((l) => l.address.toLowerCase() === VAULT_ADDRESS.toLowerCase())
   const parsed = parseEventLogs({
-    abi: nexoraVaultAbi,
+    abi: nazvexVaultAbi,
     logs,
     eventName: ['PaymentExecuted', 'PaymentBlocked', 'PaymentRequested'],
   })
@@ -40,7 +40,7 @@ export function useTx() {
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
   const publicClient = usePublicClient({ chainId: CHAIN_ID })
-  const { refetchAll } = useNexora()
+  const { refetchAll } = useNazvex()
   const [phase, setPhase] = useState<TxPhase>('idle')
 
   const run = useCallback(

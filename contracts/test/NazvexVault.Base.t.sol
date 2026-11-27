@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {NexoraVault} from "../NexoraVault.sol";
+import {NazvexVault} from "../NazvexVault.sol";
 
 /// @dev Minimal 6-decimal ERC-20 used as USDC in tests.
 contract MockUSDC {
@@ -49,8 +49,8 @@ contract MockUSDC {
     }
 }
 
-abstract contract NexoraVaultTestBase is Test {
-    NexoraVault internal vault;
+abstract contract NazvexVaultTestBase is Test {
+    NazvexVault internal vault;
     MockUSDC internal usdc;
 
     address internal owner = makeAddr("owner");
@@ -71,7 +71,7 @@ abstract contract NexoraVaultTestBase is Test {
     function setUp() public virtual {
         vm.warp(T0);
         usdc = new MockUSDC();
-        vault = new NexoraVault(address(usdc));
+        vault = new NazvexVault(address(usdc));
         usdc.mint(owner, 1_000_000e6);
         usdc.mint(owner2, 1_000_000e6);
         vm.prank(owner);
@@ -80,8 +80,8 @@ abstract contract NexoraVaultTestBase is Test {
         usdc.approve(address(vault), type(uint256).max);
     }
 
-    function _policy() internal pure returns (NexoraVault.Policy memory p) {
-        p = NexoraVault.Policy({maxPerTx: MAX_TX, dailyLimit: DAILY, approvalThreshold: THRESHOLD, expiresAt: 0});
+    function _policy() internal pure returns (NazvexVault.Policy memory p) {
+        p = NazvexVault.Policy({maxPerTx: MAX_TX, dailyLimit: DAILY, approvalThreshold: THRESHOLD, expiresAt: 0});
     }
 
     function _recips() internal view returns (address[] memory r) {
@@ -102,17 +102,17 @@ abstract contract NexoraVaultTestBase is Test {
 
     function _req(uint256 id, address to, uint256 amount)
         internal
-        returns (uint256 reqId, NexoraVault.RequestStatus st)
+        returns (uint256 reqId, NazvexVault.RequestStatus st)
     {
         vm.prank(agentWallet);
         (reqId, st) = vault.requestPayment(id, to, amount, "purpose");
     }
 
-    function _status(uint256 reqId) internal view returns (NexoraVault.RequestStatus) {
+    function _status(uint256 reqId) internal view returns (NazvexVault.RequestStatus) {
         return vault.getRequest(reqId).status;
     }
 
-    function _reason(uint256 reqId) internal view returns (NexoraVault.BlockReason) {
+    function _reason(uint256 reqId) internal view returns (NazvexVault.BlockReason) {
         return vault.getRequest(reqId).reason;
     }
 }

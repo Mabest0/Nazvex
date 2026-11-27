@@ -1,14 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { erc20Abi, type Address } from 'viem'
 import { useAccount, useReadContract, useReadContracts } from 'wagmi'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
 import { CHAIN_ID, USDC_ADDRESS, VAULT_ADDRESS, type Agent, type PayRequest } from '@/lib/vault'
 import { nowSec } from '@/lib/format'
 
 const REFRESH_MS = 8000
 const MAX_REQUESTS = 120
 
-interface NexoraState {
+interface NazvexState {
   address?: Address
   isConnected: boolean
   agents: Agent[]
@@ -22,11 +22,11 @@ interface NexoraState {
   agentById: (id: bigint) => Agent | undefined
 }
 
-const NexoraContext = createContext<NexoraState | null>(null)
+const NazvexContext = createContext<NazvexState | null>(null)
 
-const base = { address: VAULT_ADDRESS, abi: nexoraVaultAbi, chainId: CHAIN_ID } as const
+const base = { address: VAULT_ADDRESS, abi: nazvexVaultAbi, chainId: CHAIN_ID } as const
 
-export function NexoraProvider({ children }: { children: ReactNode }) {
+export function NazvexProvider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useAccount()
   const [now, setNow] = useState(nowSec())
 
@@ -119,16 +119,16 @@ export function NexoraProvider({ children }: { children: ReactNode }) {
 
   const loading = !!address && (idsQ.isLoading || (enabled && agentsQ.isLoading))
 
-  const value = useMemo<NexoraState>(
+  const value = useMemo<NazvexState>(
     () => ({ address, isConnected, agents, requests, recipients, usdcBalance, allowance, loading, now, refetchAll, agentById }),
     [address, isConnected, agents, requests, recipients, usdcBalance, allowance, loading, now, refetchAll, agentById],
   )
 
-  return <NexoraContext.Provider value={value}>{children}</NexoraContext.Provider>
+  return <NazvexContext.Provider value={value}>{children}</NazvexContext.Provider>
 }
 
-export function useNexora(): NexoraState {
-  const ctx = useContext(NexoraContext)
-  if (!ctx) throw new Error('useNexora must be used inside NexoraProvider')
+export function useNazvex(): NazvexState {
+  const ctx = useContext(NazvexContext)
+  if (!ctx) throw new Error('useNazvex must be used inside NazvexProvider')
   return ctx
 }

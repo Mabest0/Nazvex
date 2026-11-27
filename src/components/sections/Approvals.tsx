@@ -1,7 +1,7 @@
 import { Check, CheckCheck, X } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { useTx } from '@/hooks/useTx'
 import { fmtUsdc, sameAddr, timeAgo, timeUntil } from '@/lib/format'
 import { AgentStatus, RequestStatus, VAULT_ADDRESS, type Agent, type PayRequest } from '@/lib/vault'
@@ -26,13 +26,13 @@ function policyChecks(agent: Agent | undefined, r: PayRequest, allowed: string[]
 }
 
 export function Approvals({ go }: NavProps) {
-  const { agents, requests, recipients, now } = useNexora()
+  const { agents, requests, recipients, now } = useNazvex()
   const tx = useTx()
   const pending = requests.filter((r) => r.status === RequestStatus.Pending)
 
   const decide = (r: PayRequest, fn: 'approveRequest' | 'declineRequest') =>
     tx.run(fn === 'approveRequest' ? `Approve #${r.id}` : `Decline #${r.id}`, () =>
-      tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: fn, args: [r.id] }),
+      tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: fn, args: [r.id] }),
     )
 
   return (

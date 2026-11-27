@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { CONFIG_OK } from '@/lib/vault'
-import { NexoraProvider } from '@/hooks/NexoraProvider'
+import { NazvexProvider } from '@/hooks/NazvexProvider'
 import { Shell, type SectionId } from '@/components/Shell'
 import { Overview } from '@/components/sections/Overview'
 import { Agents } from '@/components/sections/Agents'
@@ -24,7 +24,7 @@ function MissingConfig() {
       <div className="card max-w-md p-8 text-center">
         <h1 className="display text-2xl font-bold">Vault address missing</h1>
         <p className="mt-2 text-pretty text-sm" style={{ color: 'var(--subtle)' }}>
-          Set <span className="mono">VITE_NEXORA_VAULT_ADDRESS</span> in the host&apos;s environment variables (or in <span className="mono">.env.production</span>) and rebuild.
+          Set <span className="mono">VITE_NAZVEX_VAULT_ADDRESS</span> in the host&apos;s environment variables (or in <span className="mono">.env.production</span>) and rebuild.
         </p>
       </div>
     </div>
@@ -46,7 +46,7 @@ export default function App() {
   if (!CONFIG_OK) return <MissingConfig />
 
   return (
-    <NexoraProvider>
+    <NazvexProvider>
       <Shell section={section} onNavigate={(s) => go(s)}>
         <ErrorBoundary key={section} label={section}>
         {section === 'overview' && <Overview {...nav} />}
@@ -60,6 +60,6 @@ export default function App() {
         {section === 'settings' && <Settings {...nav} />}
         </ErrorBoundary>
       </Shell>
-    </NexoraProvider>
+    </NazvexProvider>
   )
 }

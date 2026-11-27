@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Bot, Pause, Play, Plus, ShieldOff, SlidersHorizontal, Wallet } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { useTx } from '@/hooks/useTx'
 import { fmtDate, fmtUsdc, pct, toneFor } from '@/lib/format'
 import { AgentStatus, VAULT_ADDRESS, type Agent } from '@/lib/vault'
@@ -10,20 +10,20 @@ import { RegisterAgentModal } from '../RegisterAgentModal'
 import { AddressChip, AgentStatusPill, ConnectGate, Empty, Modal, PageHeader, ProgressBar, Spinner } from '../ui'
 
 export function Agents({ go }: NavProps) {
-  const { agents, loading } = useNexora()
+  const { agents, loading } = useNazvex()
   const [registerOpen, setRegisterOpen] = useState(false)
   const [revoking, setRevoking] = useState<Agent | null>(null)
   const tx = useTx()
 
   const setStatus = (agent: Agent, fn: 'pauseAgent' | 'resumeAgent') =>
     tx.run(fn === 'pauseAgent' ? `Pause ${agent.name}` : `Resume ${agent.name}`, () =>
-      tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: fn, args: [agent.id] }),
+      tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: fn, args: [agent.id] }),
     )
 
   const revoke = async () => {
     if (!revoking) return
     const done = await tx.run(`Revoke ${revoking.name}`, () =>
-      tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'revokeAgent', args: [revoking.id] }),
+      tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'revokeAgent', args: [revoking.id] }),
     )
     if (done) setRevoking(null)
   }

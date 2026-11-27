@@ -2,12 +2,12 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {NexoraVaultTestBase, MockUSDC} from "./NexoraVault.Base.t.sol";
-import {NexoraVault} from "../NexoraVault.sol";
+import {NazvexVaultTestBase, MockUSDC} from "./NazvexVault.Base.t.sol";
+import {NazvexVault} from "../NazvexVault.sol";
 
 /// @dev Drives bounded random actions. The handler is both owner and agent wallet of two agents.
-contract NexoraVaultHandler is Test {
-    NexoraVault public vault;
+contract NazvexVaultHandler is Test {
+    NazvexVault public vault;
     MockUSDC public usdc;
     address public r1 = address(0xA11CE);
     address public r2 = address(0xB0B);
@@ -21,7 +21,7 @@ contract NexoraVaultHandler is Test {
     uint256[] public touchedDays;
     uint256[] public pendingIds;
 
-    constructor(NexoraVault v, MockUSDC u) {
+    constructor(NazvexVault v, MockUSDC u) {
         vault = v;
         usdc = u;
         usdc.mint(address(this), type(uint128).max);
@@ -29,7 +29,7 @@ contract NexoraVaultHandler is Test {
         address[] memory rs = new address[](2);
         rs[0] = r1;
         rs[1] = r2;
-        NexoraVault.Policy memory p = NexoraVault.Policy(10e6, DAILY, 8e6, 0);
+        NazvexVault.Policy memory p = NazvexVault.Policy(10e6, DAILY, 8e6, 0);
         v.registerAgent("A", address(this), p, rs);
         v.registerAgent("B", address(this), p, rs);
     }
@@ -55,32 +55,32 @@ contract NexoraVaultHandler is Test {
         uint256 id = _agent(seed);
         amt = bound(amt, 1, 15e6);
         address to = toSeed % 3 == 0 ? r1 : toSeed % 3 == 1 ? r2 : unlisted;
-        (uint256 reqId, NexoraVault.RequestStatus st) = vault.requestPayment(id, to, amt, "");
-        if (st == NexoraVault.RequestStatus.Executed) _record(id, amt);
-        else if (st == NexoraVault.RequestStatus.Pending) pendingIds.push(reqId);
+        (uint256 reqId, NazvexVault.RequestStatus st) = vault.requestPayment(id, to, amt, "");
+        if (st == NazvexVault.RequestStatus.Executed) _record(id, amt);
+        else if (st == NazvexVault.RequestStatus.Pending) pendingIds.push(reqId);
     }
 
     function approve(uint256 idx) external {
         if (pendingIds.length == 0) return;
         uint256 reqId = pendingIds[idx % pendingIds.length];
-        NexoraVault.PaymentRequest memory r = vault.getRequest(reqId);
-        if (r.status != NexoraVault.RequestStatus.Pending || block.timestamp >= r.expiresAt) return;
+        NazvexVault.PaymentRequest memory r = vault.getRequest(reqId);
+        if (r.status != NazvexVault.RequestStatus.Pending || block.timestamp >= r.expiresAt) return;
         vault.approveRequest(reqId);
-        if (vault.getRequest(reqId).status == NexoraVault.RequestStatus.Executed) _record(r.agentId, r.amount);
+        if (vault.getRequest(reqId).status == NazvexVault.RequestStatus.Executed) _record(r.agentId, r.amount);
     }
 
     function decline(uint256 idx) external {
         if (pendingIds.length == 0) return;
         uint256 reqId = pendingIds[idx % pendingIds.length];
-        if (vault.getRequest(reqId).status != NexoraVault.RequestStatus.Pending) return;
+        if (vault.getRequest(reqId).status != NazvexVault.RequestStatus.Pending) return;
         vault.declineRequest(reqId);
     }
 
     function toggle(uint256 seed, bool pause) external {
         uint256 id = _agent(seed);
-        NexoraVault.AgentStatus s = vault.getAgent(id).status;
-        if (pause && s == NexoraVault.AgentStatus.Active) vault.pauseAgent(id);
-        else if (!pause && s == NexoraVault.AgentStatus.Paused) vault.resumeAgent(id);
+        NazvexVault.AgentStatus s = vault.getAgent(id).status;
+        if (pause && s == NazvexVault.AgentStatus.Active) vault.pauseAgent(id);
+        else if (!pause && s == NazvexVault.AgentStatus.Paused) vault.resumeAgent(id);
     }
 
     function warp(uint256 dt) external {
@@ -99,12 +99,12 @@ contract NexoraVaultHandler is Test {
     }
 }
 
-contract NexoraVaultInvariantTest is NexoraVaultTestBase {
-    NexoraVaultHandler internal handler;
+contract NazvexVaultInvariantTest is NazvexVaultTestBase {
+    NazvexVaultHandler internal handler;
 
     function setUp() public override {
         super.setUp();
-        handler = new NexoraVaultHandler(vault, usdc);
+        handler = new NazvexVaultHandler(vault, usdc);
         targetContract(address(handler));
     }
 
@@ -137,8 +137,8 @@ contract NexoraVaultInvariantTest is NexoraVaultTestBase {
 
     /// totals agree per agent: totalFunded == balance + totalSpent + withdrawn
     function invariant_PerAgentTotals() public view {
-        NexoraVault.AgentView memory a = vault.getAgent(1);
-        NexoraVault.AgentView memory b = vault.getAgent(2);
+        NazvexVault.AgentView memory a = vault.getAgent(1);
+        NazvexVault.AgentView memory b = vault.getAgent(2);
         assertEq(a.totalFunded + b.totalFunded, handler.ghostFunded());
         assertEq(a.totalSpent + b.totalSpent, handler.ghostPaid());
     }

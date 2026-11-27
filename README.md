@@ -38,8 +38,8 @@ bun run agent            # agent client: status, request, result, wait, watch
 
 ### Environment variables
 
-- `VITE_NEXORA_VAULT_ADDRESS`: address of the deployed vault contract.
-- `VITE_NEXORA_VAULT_DEPLOY_TX`: deployment transaction hash (optional, shown in the app).
+- `VITE_NAZVEX_VAULT_ADDRESS`: address of the deployed vault contract.
+- `VITE_NAZVEX_VAULT_DEPLOY_TX`: deployment transaction hash (optional, shown in the app).
 - `AGENT_PRIVATE_KEY`: the agent wallet's key, used only by the agent client. Keep it out of the repository.
 - `AGENT_RPC_URL`: optional RPC endpoint for the agent client.
 - `AGENT_WEBHOOK_SECRET`: optional; signs the webhook calls sent by `bun run agent watch`.

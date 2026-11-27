@@ -4,9 +4,9 @@ import { getUsdc, requireChain } from '@/onchain-facts'
 
 export const CHAIN_ID = arcTestnet.id
 export const CHAIN = requireChain(CHAIN_ID)
-export const VAULT_ADDRESS = import.meta.env.VITE_NEXORA_VAULT_ADDRESS as Address
+export const VAULT_ADDRESS = import.meta.env.VITE_NAZVEX_VAULT_ADDRESS as Address
 export const CONFIG_OK = isAddress(String(VAULT_ADDRESS ?? ''))
-export const VAULT_DEPLOY_TX = import.meta.env.VITE_NEXORA_VAULT_DEPLOY_TX as string | undefined
+export const VAULT_DEPLOY_TX = import.meta.env.VITE_NAZVEX_VAULT_DEPLOY_TX as string | undefined
 
 const usdcFact = getUsdc(CHAIN_ID)
 if (!usdcFact) throw new Error('USDC is not registered for Arc Testnet')

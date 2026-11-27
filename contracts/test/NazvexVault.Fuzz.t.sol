@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NexoraVaultTestBase} from "./NexoraVault.Base.t.sol";
-import {NexoraVault} from "../NexoraVault.sol";
+import {NazvexVaultTestBase} from "./NazvexVault.Base.t.sol";
+import {NazvexVault} from "../NazvexVault.sol";
 
-contract NexoraVaultFuzzTest is NexoraVaultTestBase {
+contract NazvexVaultFuzzTest is NazvexVaultTestBase {
     function _sumBalances(uint256 n) internal view returns (uint256 s) {
         for (uint256 i = 1; i <= n; ++i) s += vault.getAgent(i).balance;
     }
@@ -41,8 +41,8 @@ contract NexoraVaultFuzzTest is NexoraVaultTestBase {
             address to = targets[i] % 3 == 0 ? recipient2 : recipient; // recipient2 is unlisted
             bool first = targets[i] % 2 == 0;
             vm.prank(first ? agentWallet : newWallet);
-            (uint256 reqId, NexoraVault.RequestStatus st) = vault.requestPayment(first ? id1 : id2, to, amt, "");
-            if (st == NexoraVault.RequestStatus.Pending) {
+            (uint256 reqId, NazvexVault.RequestStatus st) = vault.requestPayment(first ? id1 : id2, to, amt, "");
+            if (st == NazvexVault.RequestStatus.Pending) {
                 vm.prank(first ? owner : owner2);
                 vault.approveRequest(reqId);
             }
@@ -58,9 +58,9 @@ contract NexoraVaultFuzzTest is NexoraVaultTestBase {
         _assertConserved();
 
         // accounting identity per agent: funded == balance + spent + withdrawn
-        NexoraVault.AgentView memory a1 = vault.getAgent(id1);
+        NazvexVault.AgentView memory a1 = vault.getAgent(id1);
         assertEq(a1.totalFunded, a1.balance + a1.totalSpent + wd1);
-        NexoraVault.AgentView memory a2 = vault.getAgent(id2);
+        NazvexVault.AgentView memory a2 = vault.getAgent(id2);
         assertEq(a2.totalFunded, a2.balance + a2.totalSpent + wd2);
         // recipients got exactly what the agents spent
         assertEq(usdc.balanceOf(recipient) + usdc.balanceOf(recipient2), a1.totalSpent + a2.totalSpent);
@@ -82,8 +82,8 @@ contract NexoraVaultFuzzTest is NexoraVaultTestBase {
                 daySum = 0;
             }
             uint256 amt = bound(amts[i], 1, MAX_TX);
-            (uint256 reqId, NexoraVault.RequestStatus st) = _req(id, recipient, amt);
-            if (st == NexoraVault.RequestStatus.Pending) {
+            (uint256 reqId, NazvexVault.RequestStatus st) = _req(id, recipient, amt);
+            if (st == NazvexVault.RequestStatus.Pending) {
                 vm.prank(owner);
                 vault.approveRequest(reqId);
             }
@@ -92,7 +92,7 @@ contract NexoraVaultFuzzTest is NexoraVaultTestBase {
             lastBal = nowBal;
 
             assertLe(daySum, DAILY, "executed volume in UTC day exceeds limit");
-            NexoraVault.AgentView memory a = vault.getAgent(id);
+            NazvexVault.AgentView memory a = vault.getAgent(id);
             assertLe(a.spentToday, DAILY);
             assertEq(a.spentToday, daySum);
             assertEq(a.remainingToday, DAILY - daySum);
@@ -108,15 +108,15 @@ contract NexoraVaultFuzzTest is NexoraVaultTestBase {
             vm.prank(owner);
             vault.pauseAgent(id);
         }
-        (NexoraVault.BlockReason reason, bool needs) = vault.previewPayment(id, to, amt);
-        (uint256 reqId, NexoraVault.RequestStatus st) = _req(id, to, amt);
-        if (reason != NexoraVault.BlockReason.None) {
-            assertEq(uint8(st), uint8(NexoraVault.RequestStatus.Blocked));
+        (NazvexVault.BlockReason reason, bool needs) = vault.previewPayment(id, to, amt);
+        (uint256 reqId, NazvexVault.RequestStatus st) = _req(id, to, amt);
+        if (reason != NazvexVault.BlockReason.None) {
+            assertEq(uint8(st), uint8(NazvexVault.RequestStatus.Blocked));
             assertEq(uint8(_reason(reqId)), uint8(reason));
         } else if (needs) {
-            assertEq(uint8(st), uint8(NexoraVault.RequestStatus.Pending));
+            assertEq(uint8(st), uint8(NazvexVault.RequestStatus.Pending));
         } else {
-            assertEq(uint8(st), uint8(NexoraVault.RequestStatus.Executed));
+            assertEq(uint8(st), uint8(NazvexVault.RequestStatus.Executed));
         }
     }
 }

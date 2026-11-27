@@ -1,13 +1,13 @@
 import { ArrowRight, Bot, Check, Circle } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { fmtUsdc, timeAgo, toneFor } from '@/lib/format'
 import { pct } from '@/lib/format'
 import { AgentStatus, BLOCK_REASON_LABEL, RequestStatus } from '@/lib/vault'
 import { AgentStatusPill, ConnectGate, Empty, PageHeader, ProgressBar, RequestStatusPill, Stat } from '../ui'
 
 export function Overview({ go }: NavProps) {
-  const { agents, requests, usdcBalance, loading, now } = useNexora()
+  const { agents, requests, usdcBalance, loading, now } = useNazvex()
 
   const allocated = agents.reduce((s, a) => s + a.totalFunded, 0n)
   const spent = agents.reduce((s, a) => s + a.totalSpent, 0n)

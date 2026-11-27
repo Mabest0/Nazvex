@@ -45,12 +45,13 @@ bun run dev
 
 ## Deployed contracts
 
-- NexoraVault (contract name kept as deployed; the product is Nazvex) (Arc Testnet, chain 5042002): `0x81706229562ddbace8d475ad3f8fdc22c05e4a04`
-  - Deploy tx: `0xde55764de8a60db6a8877ca82c075464d016e5f69b2eb16ee8d57fe6c51949c9`
-  - Verified on the Arc Testnet explorer (https://explorer.testnet.arc.io; testnet.arcscan.app redirects there). Source: contracts/NexoraVault.sol, solc 0.8.28, optimizer 200 runs, evm cancun.
-  - Created by smart account `0xa3039A54856ed74B5AEc999EeF3fc954Ab010Cf6` (platform deployer, via ERC-4337 EntryPoint `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`). No factory used.
-  - Constructor arg: USDC `0x3600000000000000000000000000000000000000`
-  - Address lives in `.env` as `VITE_NEXORA_VAULT_ADDRESS`; ABI in `src/contracts/nexoraVaultAbi.ts` (regenerate from `contracts/out/NexoraVault.sol/NexoraVault.json` after contract changes).
+- **Legacy vault (deployed under the earlier name `NexoraVault`, same code as `NazvexVault`)**, Arc Testnet (chain 5042002): `0x81706229562ddbace8d475ad3f8fdc22c05e4a04`
+  - Deploy tx: `0xde55764de8a60db6a8877ca82c075464d016e5f69b2eb16ee8d57fe6c51949c9`. Verified on https://explorer.testnet.arc.io (testnet.arcscan.app redirects there).
+  - Created by the platform's shared deployer account `0xa3039A54856ed74B5AEc999EeF3fc954Ab010Cf6` (via ERC-4337 EntryPoint `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`). No factory used.
+  - Still holds agent #1 and test USDC. The owner withdraws from its explorer page (Write contract, `withdrawFromAgent`).
+- **NazvexVault (current)**: to be deployed by the owner from their own wallet through Remix using `docs/remix/NazvexVault.flat.sol`. Until then the app still points at the legacy vault. After deploying, set `VITE_NAZVEX_VAULT_ADDRESS` and `VITE_NAZVEX_VAULT_DEPLOY_TX` in `.env` and `.env.production`.
+  - Constructor arg: USDC `0x3600000000000000000000000000000000000000`. Compiler: solc 0.8.28, optimizer 200 runs, EVM cancun.
+  - ABI in `src/contracts/nazvexVaultAbi.ts` (regenerate from `contracts/out/NazvexVault.sol/NazvexVault.json` after contract changes).
 
 ## Decisions
 

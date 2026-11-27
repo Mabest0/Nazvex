@@ -7,7 +7,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
- * @title NexoraVault
+ * @title NazvexVault
  * @notice Multi-tenant USDC custody and contract-enforced spending policies for AI agents.
  * @dev No global admin, upgrade mechanism, or privileged backend exists. AI/backend software
  * cannot move custody funds directly: its designated agent wallet can only request payments
@@ -17,7 +17,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
  * Intended Arc Testnet token: 0x3600000000000000000000000000000000000000, supplied at deployment.
  * Direct token transfers do not credit any agent. Only fundAgent credits custody balances.
  */
-contract NexoraVault is ReentrancyGuard {
+contract NazvexVault is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
 

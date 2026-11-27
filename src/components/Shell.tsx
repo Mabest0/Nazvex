@@ -13,7 +13,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import { Logo } from './Logo'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { computeAlerts } from '@/lib/monitoring'
 import { CHAIN, CHAIN_ID, RequestStatus } from '@/lib/vault'
 
@@ -43,7 +43,7 @@ const NAV: Array<{ id: SectionId; label: string; icon: typeof Bot }> = [
 export function Shell({ section, onNavigate, children }: { section: SectionId; onNavigate: (s: SectionId) => void; children: ReactNode }) {
   const { chainId, isConnected } = useAccount()
   const { switchChain, isPending } = useSwitchChain()
-  const { agents, requests, now } = useNexora()
+  const { agents, requests, now } = useNazvex()
 
   const pendingCount = useMemo(
     () => requests.filter((r) => r.status === RequestStatus.Pending && Number(r.expiresAt) > now).length,

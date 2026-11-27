@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { isAddress, type Address } from 'viem'
 import { useAccount } from 'wagmi'
 import { toast } from 'sonner'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
 import { useTx } from '@/hooks/useTx'
 import { parseUsdc } from '@/onchain-money'
 import { nowSec } from '@/lib/format'
@@ -62,7 +62,7 @@ export function RegisterAgentModal({ open, onClose, onDone }: { open: boolean; o
     const result = await tx.run('Register agent', () =>
       tx.write({
         address: VAULT_ADDRESS,
-        abi: nexoraVaultAbi,
+        abi: nazvexVaultAbi,
         functionName: 'registerAgent',
         args: [
           name.trim(),

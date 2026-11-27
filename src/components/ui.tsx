@@ -6,7 +6,7 @@ import { TokenUSDC } from '@web3icons/react'
 import { buildAddressExplorerUrl } from '@/onchain-facts'
 import { shortAddr } from '@/lib/format'
 import { CHAIN_ID, AGENT_STATUS_LABEL, REQUEST_STATUS_LABEL, AgentStatus, RequestStatus } from '@/lib/vault'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { useNazvex } from '@/hooks/NazvexProvider'
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   return (
@@ -215,7 +215,7 @@ export function Modal({ open, onClose, title, children }: { open: boolean; onClo
 
 /** Wraps a section that needs a connected wallet. */
 export function ConnectGate({ children }: { children: ReactNode }) {
-  const { isConnected } = useNexora()
+  const { isConnected } = useNazvex()
   if (isConnected) return <>{children}</>
   return (
     <Empty

@@ -15,7 +15,7 @@
  *
  * Environment:
  *   AGENT_PRIVATE_KEY           the agent wallet's key (required for `request`; never the owner's key)
- *   VITE_NEXORA_VAULT_ADDRESS   vault address (already set in .env / .env.production)
+ *   VITE_NAZVEX_VAULT_ADDRESS   vault address (already set in .env / .env.production)
  *   AGENT_RPC_URL               optional RPC endpoint; defaults to the public Arc Testnet RPC
  *   AGENT_WEBHOOK_SECRET        optional; signs webhook bodies (header x-nazvex-signature, HMAC-SHA256)
  */
@@ -32,7 +32,7 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
-import { nexoraVaultAbi } from '../src/contracts/nexoraVaultAbi'
+import { nazvexVaultAbi } from '../src/contracts/nazvexVaultAbi'
 import { requireChain } from '../src/onchain-facts'
 import { runWait, runWatch, type WatchContext } from './agent-watch'
 
@@ -65,8 +65,8 @@ const { positionals, values } = parseArgs({
   },
 })
 
-const vaultAddress = process.env.VITE_NEXORA_VAULT_ADDRESS
-if (!vaultAddress || !isAddress(vaultAddress)) fail('VITE_NEXORA_VAULT_ADDRESS is missing or invalid.')
+const vaultAddress = process.env.VITE_NAZVEX_VAULT_ADDRESS
+if (!vaultAddress || !isAddress(vaultAddress)) fail('VITE_NAZVEX_VAULT_ADDRESS is missing or invalid.')
 const vault = vaultAddress
 // RPC order: explicit override, then the sandbox RPC proxy for this chain, then the public endpoint.
 const proxyChains = (process.env.RPC_PROXY_CHAINS ?? '').split(',')
@@ -111,8 +111,8 @@ function friendly(error: unknown): string {
 
 async function status() {
   const id = agentId()
-  const a = await publicClient.readContract({ address: vault, abi: nexoraVaultAbi, functionName: 'getAgent', args: [id] })
-  const recipients = await publicClient.readContract({ address: vault, abi: nexoraVaultAbi, functionName: 'getRecipients', args: [id] })
+  const a = await publicClient.readContract({ address: vault, abi: nazvexVaultAbi, functionName: 'getAgent', args: [id] })
+  const recipients = await publicClient.readContract({ address: vault, abi: nazvexVaultAbi, functionName: 'getRecipients', args: [id] })
   const p = a.policy
   const approval = p.approvalThreshold === p.maxPerTx ? 'none' : `above ${usdc(p.approvalThreshold)}`
   out(
@@ -149,14 +149,14 @@ async function request() {
   // Dry run first so wrong-wallet and bad-input errors come back with a clear message and no gas spent.
   const args = [id, to, amount, values.purpose ?? ''] as const
   try {
-    await publicClient.simulateContract({ address: vault, abi: nexoraVaultAbi, functionName: 'requestPayment', args, account })
+    await publicClient.simulateContract({ address: vault, abi: nazvexVaultAbi, functionName: 'requestPayment', args, account })
   } catch (error) {
     fail(friendly(error))
   }
 
   let hash: Hex
   try {
-    hash = await wallet.writeContract({ address: vault, abi: nexoraVaultAbi, functionName: 'requestPayment', args })
+    hash = await wallet.writeContract({ address: vault, abi: nazvexVaultAbi, functionName: 'requestPayment', args })
   } catch (error) {
     return fail(friendly(error))
   }
@@ -164,7 +164,7 @@ async function request() {
   if (receipt.status !== 'success') fail(`Transaction ${hash} reverted.`)
 
   const logs = parseEventLogs({
-    abi: nexoraVaultAbi,
+    abi: nazvexVaultAbi,
     logs: receipt.logs.filter((l) => l.address.toLowerCase() === vault.toLowerCase()),
     eventName: ['PaymentExecuted', 'PaymentBlocked', 'PaymentRequested'],
   })
@@ -183,7 +183,7 @@ async function request() {
 
 async function result() {
   if (!values.request || !/^\d+$/.test(values.request)) fail('Pass --request <id>.')
-  const r = await publicClient.readContract({ address: vault, abi: nexoraVaultAbi, functionName: 'getRequest', args: [BigInt(values.request)] })
+  const r = await publicClient.readContract({ address: vault, abi: nazvexVaultAbi, functionName: 'getRequest', args: [BigInt(values.request)] })
   const state = STATUSES[r.status]
   const detail = r.status === 2 ? ` (${REASONS[r.reason]})` : ''
   out(`request #${r.id}: ${state}${detail}. ${usdc(r.amount)} to ${r.to}`, { requestId: r.id, status: state, reason: REASONS[r.reason], amount: r.amount, to: r.to })

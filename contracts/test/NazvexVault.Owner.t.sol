@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NexoraVaultTestBase} from "./NexoraVault.Base.t.sol";
-import {NexoraVault} from "../NexoraVault.sol";
+import {NazvexVaultTestBase} from "./NazvexVault.Base.t.sol";
+import {NazvexVault} from "../NazvexVault.sol";
 
-contract NexoraVaultOwnerTest is NexoraVaultTestBase {
+contract NazvexVaultOwnerTest is NazvexVaultTestBase {
     // ---------------------------------------------------------------- constructor
     function test_Constructor_SetsUsdc() public view {
         assertEq(address(vault.usdc()), address(usdc));
@@ -13,23 +13,23 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     }
 
     function test_Constructor_RevertsOnZeroToken() public {
-        vm.expectRevert(NexoraVault.ZeroAddress.selector);
-        new NexoraVault(address(0));
+        vm.expectRevert(NazvexVault.ZeroAddress.selector);
+        new NazvexVault(address(0));
     }
 
     // ---------------------------------------------------------------- registerAgent
     function test_Register_Valid() public {
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.AgentRegistered(1, owner, agentWallet, "Agent");
+        emit NazvexVault.AgentRegistered(1, owner, agentWallet, "Agent");
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.RecipientUpdated(1, recipient, true);
+        emit NazvexVault.RecipientUpdated(1, recipient, true);
         uint256 id = _register();
         assertEq(id, 1);
-        NexoraVault.AgentView memory a = vault.getAgent(id);
+        NazvexVault.AgentView memory a = vault.getAgent(id);
         assertEq(a.owner, owner);
         assertEq(a.wallet, agentWallet);
         assertEq(a.name, "Agent");
-        assertEq(uint8(a.status), uint8(NexoraVault.AgentStatus.Active));
+        assertEq(uint8(a.status), uint8(NazvexVault.AgentStatus.Active));
         assertEq(a.balance, 0);
         assertEq(a.createdAt, uint64(T0));
         assertEq(a.policy.maxPerTx, MAX_TX);
@@ -44,7 +44,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         // name exactly 48 bytes, threshold == maxPerTx, daily == maxPerTx, threshold 0, no recipients
         bytes memory n = new bytes(48);
         for (uint256 i; i < 48; ++i) n[i] = "a";
-        NexoraVault.Policy memory p = NexoraVault.Policy(5e6, 5e6, 5e6, uint64(T0 + 1));
+        NazvexVault.Policy memory p = NazvexVault.Policy(5e6, 5e6, 5e6, uint64(T0 + 1));
         vm.prank(owner);
         vault.registerAgent(string(n), agentWallet, p, new address[](0));
         p.approvalThreshold = 0;
@@ -55,7 +55,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
 
     function test_Register_RevertsEmptyName() public {
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidName.selector);
+        vm.expectRevert(NazvexVault.InvalidName.selector);
         vault.registerAgent("", agentWallet, _policy(), _recips());
     }
 
@@ -63,18 +63,18 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         bytes memory n = new bytes(49);
         for (uint256 i; i < 49; ++i) n[i] = "a";
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidName.selector);
+        vm.expectRevert(NazvexVault.InvalidName.selector);
         vault.registerAgent(string(n), agentWallet, _policy(), _recips());
     }
 
     function test_Register_RevertsZeroWallet() public {
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.ZeroAddress.selector);
+        vm.expectRevert(NazvexVault.ZeroAddress.selector);
         vault.registerAgent("A", address(0), _policy(), _recips());
     }
 
     function test_Register_RevertsInvalidPolicies() public {
-        NexoraVault.Policy memory p = _policy();
+        NazvexVault.Policy memory p = _policy();
         p.maxPerTx = 0;
         _expectRegisterInvalidPolicy(p);
         p = _policy();
@@ -90,9 +90,9 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         _expectRegisterInvalidPolicy(p);
     }
 
-    function _expectRegisterInvalidPolicy(NexoraVault.Policy memory p) internal {
+    function _expectRegisterInvalidPolicy(NazvexVault.Policy memory p) internal {
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidPolicy.selector);
+        vm.expectRevert(NazvexVault.InvalidPolicy.selector);
         vault.registerAgent("A", agentWallet, p, _recips());
     }
 
@@ -100,7 +100,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         address[] memory r = new address[](51);
         for (uint256 i; i < 51; ++i) r[i] = address(uint160(0x1000 + i));
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.TooManyRecipients.selector);
+        vm.expectRevert(NazvexVault.TooManyRecipients.selector);
         vault.registerAgent("A", agentWallet, _policy(), r);
     }
 
@@ -116,11 +116,11 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         address[] memory r = new address[](1);
         r[0] = address(0);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidRecipient.selector);
+        vm.expectRevert(NazvexVault.InvalidRecipient.selector);
         vault.registerAgent("A", agentWallet, _policy(), r);
         r[0] = address(vault);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidRecipient.selector);
+        vm.expectRevert(NazvexVault.InvalidRecipient.selector);
         vault.registerAgent("A", agentWallet, _policy(), r);
     }
 
@@ -129,7 +129,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         r[0] = recipient;
         r[1] = recipient;
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.RecipientUnchanged.selector);
+        vm.expectRevert(NazvexVault.RecipientUnchanged.selector);
         vault.registerAgent("A", agentWallet, _policy(), r);
         assertEq(vault.agentCount(), 0);
     }
@@ -138,10 +138,10 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_Fund_Happy() public {
         uint256 id = _register();
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.AgentFunded(id, owner, 50e6);
+        emit NazvexVault.AgentFunded(id, owner, 50e6);
         vm.prank(owner);
         vault.fundAgent(id, 50e6);
-        NexoraVault.AgentView memory a = vault.getAgent(id);
+        NazvexVault.AgentView memory a = vault.getAgent(id);
         assertEq(a.balance, 50e6);
         assertEq(a.totalFunded, 50e6);
         assertEq(usdc.balanceOf(address(vault)), 50e6);
@@ -159,20 +159,20 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_Fund_Reverts() public {
         uint256 id = _register();
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidAmount.selector);
+        vm.expectRevert(NazvexVault.InvalidAmount.selector);
         vault.fundAgent(id, 0);
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.fundAgent(id, 1e6);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.fundAgent(99, 1e6);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.fundAgent(0, 1e6);
         vm.startPrank(owner);
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.fundAgent(id, 1e6);
         vm.stopPrank();
     }
@@ -200,7 +200,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         uint256 id = _registerFunded(50e6);
         uint256 before_ = usdc.balanceOf(owner);
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.AgentWithdrawn(id, owner, 20e6);
+        emit NazvexVault.AgentWithdrawn(id, owner, 20e6);
         vm.prank(owner);
         vault.withdrawFromAgent(id, 20e6);
         assertEq(usdc.balanceOf(owner), before_ + 20e6);
@@ -211,20 +211,20 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_Withdraw_RevertsInsufficient() public {
         uint256 id = _registerFunded(5e6);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InsufficientBalance.selector);
+        vm.expectRevert(NazvexVault.InsufficientBalance.selector);
         vault.withdrawFromAgent(id, 5e6 + 1);
     }
 
     function test_Withdraw_RevertsNonOwner() public {
         uint256 id = _registerFunded(5e6);
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.withdrawFromAgent(id, 1);
         vm.prank(agentWallet);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.withdrawFromAgent(id, 1);
         vm.prank(owner2);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.withdrawFromAgent(id, 1);
     }
 
@@ -249,7 +249,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_Withdraw_WhenPolicyExpired() public {
         vm.prank(owner);
         uint256 id =
-            vault.registerAgent("A", agentWallet, NexoraVault.Policy(MAX_TX, DAILY, THRESHOLD, uint64(T0 + 1 hours)), _recips());
+            vault.registerAgent("A", agentWallet, NazvexVault.Policy(MAX_TX, DAILY, THRESHOLD, uint64(T0 + 1 hours)), _recips());
         vm.prank(owner);
         vault.fundAgent(id, 10e6);
         vm.warp(T0 + 2 hours);
@@ -261,12 +261,12 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     // ---------------------------------------------------------------- setPolicy
     function test_SetPolicy_Happy() public {
         uint256 id = _register();
-        NexoraVault.Policy memory p = NexoraVault.Policy(3e6, 6e6, 2e6, uint64(T0 + 30 days));
+        NazvexVault.Policy memory p = NazvexVault.Policy(3e6, 6e6, 2e6, uint64(T0 + 30 days));
         vm.expectEmit(true, false, false, true, address(vault));
-        emit NexoraVault.PolicyUpdated(id, 3e6, 6e6, 2e6, uint64(T0 + 30 days));
+        emit NazvexVault.PolicyUpdated(id, 3e6, 6e6, 2e6, uint64(T0 + 30 days));
         vm.prank(owner);
         vault.setPolicy(id, p);
-        NexoraVault.Policy memory got = vault.getAgent(id).policy;
+        NazvexVault.Policy memory got = vault.getAgent(id).policy;
         assertEq(got.maxPerTx, 3e6);
         assertEq(got.dailyLimit, 6e6);
         assertEq(got.approvalThreshold, 2e6);
@@ -275,22 +275,22 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
 
     function test_SetPolicy_Reverts() public {
         uint256 id = _register();
-        NexoraVault.Policy memory p = _policy();
+        NazvexVault.Policy memory p = _policy();
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.setPolicy(id, p);
         p.maxPerTx = 0;
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidPolicy.selector);
+        vm.expectRevert(NazvexVault.InvalidPolicy.selector);
         vault.setPolicy(id, p);
         p = _policy();
         p.expiresAt = uint64(T0);
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.InvalidPolicy.selector);
+        vm.expectRevert(NazvexVault.InvalidPolicy.selector);
         vault.setPolicy(id, p);
         vm.startPrank(owner);
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.setPolicy(id, _policy());
         vm.stopPrank();
     }
@@ -307,14 +307,14 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_AddRemoveRecipient() public {
         uint256 id = _register();
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.RecipientUpdated(id, recipient2, true);
+        emit NazvexVault.RecipientUpdated(id, recipient2, true);
         vm.prank(owner);
         vault.addRecipient(id, recipient2);
         assertTrue(vault.isRecipientAllowed(id, recipient2));
         assertEq(vault.getRecipients(id).length, 2);
 
         vm.expectEmit(true, true, false, true, address(vault));
-        emit NexoraVault.RecipientUpdated(id, recipient2, false);
+        emit NazvexVault.RecipientUpdated(id, recipient2, false);
         vm.prank(owner);
         vault.removeRecipient(id, recipient2);
         assertFalse(vault.isRecipientAllowed(id, recipient2));
@@ -325,17 +325,17 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_AddRecipient_Reverts() public {
         uint256 id = _register();
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.addRecipient(id, recipient2);
         vm.startPrank(owner);
-        vm.expectRevert(NexoraVault.RecipientUnchanged.selector);
+        vm.expectRevert(NazvexVault.RecipientUnchanged.selector);
         vault.addRecipient(id, recipient);
-        vm.expectRevert(NexoraVault.InvalidRecipient.selector);
+        vm.expectRevert(NazvexVault.InvalidRecipient.selector);
         vault.addRecipient(id, address(0));
-        vm.expectRevert(NexoraVault.InvalidRecipient.selector);
+        vm.expectRevert(NazvexVault.InvalidRecipient.selector);
         vault.addRecipient(id, address(vault));
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.addRecipient(id, recipient2);
         vm.stopPrank();
     }
@@ -344,7 +344,7 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         uint256 id = _register(); // 1 recipient
         vm.startPrank(owner);
         for (uint256 i; i < 49; ++i) vault.addRecipient(id, address(uint160(0x2000 + i)));
-        vm.expectRevert(NexoraVault.TooManyRecipients.selector);
+        vm.expectRevert(NazvexVault.TooManyRecipients.selector);
         vault.addRecipient(id, address(0x9999));
         vm.stopPrank();
         assertEq(vault.getRecipients(id).length, 50);
@@ -353,15 +353,15 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_RemoveRecipient_Reverts() public {
         uint256 id = _register();
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.removeRecipient(id, recipient);
         vm.startPrank(owner);
-        vm.expectRevert(NexoraVault.RecipientUnchanged.selector);
+        vm.expectRevert(NazvexVault.RecipientUnchanged.selector);
         vault.removeRecipient(id, recipient2);
-        vm.expectRevert(NexoraVault.InvalidRecipient.selector);
+        vm.expectRevert(NazvexVault.InvalidRecipient.selector);
         vault.removeRecipient(id, address(0));
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.removeRecipient(id, recipient);
         vm.stopPrank();
     }
@@ -370,29 +370,29 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_SetAgentWallet_Happy() public {
         uint256 id = _registerFunded(10e6);
         vm.expectEmit(true, false, false, true, address(vault));
-        emit NexoraVault.AgentWalletUpdated(id, newWallet);
+        emit NazvexVault.AgentWalletUpdated(id, newWallet);
         vm.prank(owner);
         vault.setAgentWallet(id, newWallet);
         assertEq(vault.getAgent(id).wallet, newWallet);
         // old wallet loses authority, new wallet gains it
         vm.prank(agentWallet);
-        vm.expectRevert(NexoraVault.NotAgentWallet.selector);
+        vm.expectRevert(NazvexVault.NotAgentWallet.selector);
         vault.requestPayment(id, recipient, 1e6, "");
         vm.prank(newWallet);
-        (, NexoraVault.RequestStatus st) = vault.requestPayment(id, recipient, 1e6, "");
-        assertEq(uint8(st), uint8(NexoraVault.RequestStatus.Executed));
+        (, NazvexVault.RequestStatus st) = vault.requestPayment(id, recipient, 1e6, "");
+        assertEq(uint8(st), uint8(NazvexVault.RequestStatus.Executed));
     }
 
     function test_SetAgentWallet_Reverts() public {
         uint256 id = _register();
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.setAgentWallet(id, newWallet);
         vm.startPrank(owner);
-        vm.expectRevert(NexoraVault.ZeroAddress.selector);
+        vm.expectRevert(NazvexVault.ZeroAddress.selector);
         vault.setAgentWallet(id, address(0));
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.setAgentWallet(id, newWallet);
         vm.stopPrank();
     }
@@ -401,22 +401,22 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_PauseResumeRevoke_Happy() public {
         uint256 id = _register();
         vm.expectEmit(true, false, false, true, address(vault));
-        emit NexoraVault.AgentStatusChanged(id, NexoraVault.AgentStatus.Paused);
+        emit NazvexVault.AgentStatusChanged(id, NazvexVault.AgentStatus.Paused);
         vm.prank(owner);
         vault.pauseAgent(id);
-        assertEq(uint8(vault.getAgent(id).status), uint8(NexoraVault.AgentStatus.Paused));
+        assertEq(uint8(vault.getAgent(id).status), uint8(NazvexVault.AgentStatus.Paused));
 
         vm.expectEmit(true, false, false, true, address(vault));
-        emit NexoraVault.AgentStatusChanged(id, NexoraVault.AgentStatus.Active);
+        emit NazvexVault.AgentStatusChanged(id, NazvexVault.AgentStatus.Active);
         vm.prank(owner);
         vault.resumeAgent(id);
-        assertEq(uint8(vault.getAgent(id).status), uint8(NexoraVault.AgentStatus.Active));
+        assertEq(uint8(vault.getAgent(id).status), uint8(NazvexVault.AgentStatus.Active));
 
         vm.expectEmit(true, false, false, true, address(vault));
-        emit NexoraVault.AgentStatusChanged(id, NexoraVault.AgentStatus.Revoked);
+        emit NazvexVault.AgentStatusChanged(id, NazvexVault.AgentStatus.Revoked);
         vm.prank(owner);
         vault.revokeAgent(id);
-        assertEq(uint8(vault.getAgent(id).status), uint8(NexoraVault.AgentStatus.Revoked));
+        assertEq(uint8(vault.getAgent(id).status), uint8(NazvexVault.AgentStatus.Revoked));
     }
 
     function test_RevokeFromPaused() public {
@@ -425,23 +425,23 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         vault.pauseAgent(id);
         vault.revokeAgent(id);
         vm.stopPrank();
-        assertEq(uint8(vault.getAgent(id).status), uint8(NexoraVault.AgentStatus.Revoked));
+        assertEq(uint8(vault.getAgent(id).status), uint8(NazvexVault.AgentStatus.Revoked));
     }
 
     function test_Status_InvalidTransitions() public {
         uint256 id = _register();
         vm.startPrank(owner);
-        vm.expectRevert(NexoraVault.InvalidAgentStatus.selector);
+        vm.expectRevert(NazvexVault.InvalidAgentStatus.selector);
         vault.resumeAgent(id); // active -> resume
         vault.pauseAgent(id);
-        vm.expectRevert(NexoraVault.InvalidAgentStatus.selector);
+        vm.expectRevert(NazvexVault.InvalidAgentStatus.selector);
         vault.pauseAgent(id); // double pause
         vault.revokeAgent(id);
-        vm.expectRevert(NexoraVault.InvalidAgentStatus.selector);
+        vm.expectRevert(NazvexVault.InvalidAgentStatus.selector);
         vault.pauseAgent(id);
-        vm.expectRevert(NexoraVault.InvalidAgentStatus.selector);
+        vm.expectRevert(NazvexVault.InvalidAgentStatus.selector);
         vault.resumeAgent(id); // revoked never resumes
-        vm.expectRevert(NexoraVault.AgentRevoked.selector);
+        vm.expectRevert(NazvexVault.AgentRevoked.selector);
         vault.revokeAgent(id);
         vm.stopPrank();
     }
@@ -449,11 +449,11 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     function test_Status_NonOwnerReverts() public {
         uint256 id = _register();
         vm.startPrank(agentWallet);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.pauseAgent(id);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.resumeAgent(id);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.revokeAgent(id);
         vm.stopPrank();
     }
@@ -475,15 +475,15 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
     }
 
     function test_UnknownAgentViewsRevert() public {
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.getAgent(1);
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.getRecipients(1);
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.getAgentRequestIds(1);
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.previewPayment(1, recipient, 1);
-        vm.expectRevert(NexoraVault.UnknownRequest.selector);
+        vm.expectRevert(NazvexVault.UnknownRequest.selector);
         vault.getRequest(1);
     }
 
@@ -494,12 +494,12 @@ contract NexoraVaultOwnerTest is NexoraVaultTestBase {
         assertEq(vault.getAgent(b).balance, 0);
         // agent B has no balance: payment from B is blocked even though A has funds
         vm.prank(agentWallet);
-        (, NexoraVault.RequestStatus st) = vault.requestPayment(b, recipient, 1e6, "");
-        assertEq(uint8(st), uint8(NexoraVault.RequestStatus.Blocked));
+        (, NazvexVault.RequestStatus st) = vault.requestPayment(b, recipient, 1e6, "");
+        assertEq(uint8(st), uint8(NazvexVault.RequestStatus.Blocked));
         assertEq(vault.getAgent(a).balance, 10e6);
         // owner cannot touch owner2's agent
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.NotAgentOwner.selector);
+        vm.expectRevert(NazvexVault.NotAgentOwner.selector);
         vault.pauseAgent(b);
     }
 }

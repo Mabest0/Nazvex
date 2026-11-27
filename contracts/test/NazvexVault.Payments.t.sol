@@ -1,38 +1,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NexoraVaultTestBase} from "./NexoraVault.Base.t.sol";
-import {NexoraVault} from "../NexoraVault.sol";
+import {NazvexVaultTestBase} from "./NazvexVault.Base.t.sol";
+import {NazvexVault} from "../NazvexVault.sol";
 
-contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
-    NexoraVault.RequestStatus internal constant EXECUTED = NexoraVault.RequestStatus.Executed;
-    NexoraVault.RequestStatus internal constant BLOCKED = NexoraVault.RequestStatus.Blocked;
-    NexoraVault.RequestStatus internal constant PENDING = NexoraVault.RequestStatus.Pending;
+contract NazvexVaultPaymentsTest is NazvexVaultTestBase {
+    NazvexVault.RequestStatus internal constant EXECUTED = NazvexVault.RequestStatus.Executed;
+    NazvexVault.RequestStatus internal constant BLOCKED = NazvexVault.RequestStatus.Blocked;
+    NazvexVault.RequestStatus internal constant PENDING = NazvexVault.RequestStatus.Pending;
 
     /// @dev Make a request expected to be Blocked with `reason`; assert no funds moved and no revert.
-    function _assertBlocked(uint256 id, address to, uint256 amt, NexoraVault.BlockReason reason)
+    function _assertBlocked(uint256 id, address to, uint256 amt, NazvexVault.BlockReason reason)
         internal
         returns (uint256 reqId)
     {
         uint256 vaultBal = usdc.balanceOf(address(vault));
         uint256 toBal = usdc.balanceOf(to);
-        NexoraVault.AgentView memory before_ = vault.getAgent(id);
+        NazvexVault.AgentView memory before_ = vault.getAgent(id);
         uint256 expectedId = vault.requestCount() + 1;
 
         vm.expectEmit(true, true, true, true, address(vault));
-        emit NexoraVault.PaymentBlocked(expectedId, id, to, amt, reason);
-        NexoraVault.RequestStatus st;
+        emit NazvexVault.PaymentBlocked(expectedId, id, to, amt, reason);
+        NazvexVault.RequestStatus st;
         (reqId, st) = _req(id, to, amt);
 
         assertEq(reqId, expectedId);
         assertEq(uint8(st), uint8(BLOCKED));
-        NexoraVault.PaymentRequest memory r = vault.getRequest(reqId);
+        NazvexVault.PaymentRequest memory r = vault.getRequest(reqId);
         assertEq(uint8(r.status), uint8(BLOCKED));
         assertEq(uint8(r.reason), uint8(reason));
         assertEq(r.resolvedAt, uint64(block.timestamp));
         assertEq(usdc.balanceOf(address(vault)), vaultBal);
         assertEq(usdc.balanceOf(to), toBal);
-        NexoraVault.AgentView memory after_ = vault.getAgent(id);
+        NazvexVault.AgentView memory after_ = vault.getAgent(id);
         assertEq(after_.balance, before_.balance);
         assertEq(after_.totalSpent, before_.totalSpent);
         assertEq(after_.spentToday, before_.spentToday);
@@ -42,20 +42,20 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
     function test_Request_ExecutesImmediately() public {
         uint256 id = _registerFunded(100e6);
         vm.expectEmit(true, true, true, true, address(vault));
-        emit NexoraVault.PaymentExecuted(1, id, recipient, 5e6);
+        emit NazvexVault.PaymentExecuted(1, id, recipient, 5e6);
         vm.prank(agentWallet);
-        (uint256 reqId, NexoraVault.RequestStatus st) = vault.requestPayment(id, recipient, 5e6, "invoice");
+        (uint256 reqId, NazvexVault.RequestStatus st) = vault.requestPayment(id, recipient, 5e6, "invoice");
         assertEq(reqId, 1);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(usdc.balanceOf(recipient), 5e6);
         assertEq(usdc.balanceOf(address(vault)), 95e6);
-        NexoraVault.AgentView memory a = vault.getAgent(id);
+        NazvexVault.AgentView memory a = vault.getAgent(id);
         assertEq(a.balance, 95e6);
         assertEq(a.totalSpent, 5e6);
         assertEq(a.totalFunded, 100e6);
         assertEq(a.spentToday, 5e6);
         assertEq(a.remainingToday, DAILY - 5e6);
-        NexoraVault.PaymentRequest memory r = vault.getRequest(reqId);
+        NazvexVault.PaymentRequest memory r = vault.getRequest(reqId);
         assertEq(r.id, 1);
         assertEq(r.agentId, id);
         assertEq(r.to, recipient);
@@ -69,7 +69,7 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
 
     function test_Request_AtThresholdAndMaxBoundaries() public {
         uint256 id = _registerFunded(100e6);
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, THRESHOLD); // == threshold executes
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, THRESHOLD); // == threshold executes
         assertEq(uint8(st), uint8(EXECUTED));
         // tighten so max == threshold == 10 (pending never possible), pay == max
         (, st) = _req(id, recipient, THRESHOLD + 1); // 9 > threshold -> pending
@@ -79,19 +79,19 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
     function test_Request_InputReverts() public {
         uint256 id = _registerFunded(100e6);
         vm.prank(stranger);
-        vm.expectRevert(NexoraVault.NotAgentWallet.selector);
+        vm.expectRevert(NazvexVault.NotAgentWallet.selector);
         vault.requestPayment(id, recipient, 1e6, "");
         vm.prank(owner);
-        vm.expectRevert(NexoraVault.NotAgentWallet.selector);
+        vm.expectRevert(NazvexVault.NotAgentWallet.selector);
         vault.requestPayment(id, recipient, 1e6, "");
         vm.startPrank(agentWallet);
-        vm.expectRevert(NexoraVault.InvalidAmount.selector);
+        vm.expectRevert(NazvexVault.InvalidAmount.selector);
         vault.requestPayment(id, recipient, 0, "");
-        vm.expectRevert(NexoraVault.ZeroAddress.selector);
+        vm.expectRevert(NazvexVault.ZeroAddress.selector);
         vault.requestPayment(id, address(0), 1e6, "");
-        vm.expectRevert(NexoraVault.UnknownAgent.selector);
+        vm.expectRevert(NazvexVault.UnknownAgent.selector);
         vault.requestPayment(7, recipient, 1e6, "");
-        vm.expectRevert(NexoraVault.PurposeTooLong.selector);
+        vm.expectRevert(NazvexVault.PurposeTooLong.selector);
         vault.requestPayment(id, recipient, 1e6, string(new bytes(141)));
         vm.stopPrank();
         assertEq(vault.requestCount(), 0); // invalid inputs are not recorded
@@ -102,7 +102,7 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         bytes memory p = new bytes(140);
         for (uint256 i; i < 140; ++i) p[i] = "p";
         vm.prank(agentWallet);
-        (, NexoraVault.RequestStatus st) = vault.requestPayment(id, recipient, 1e6, string(p));
+        (, NazvexVault.RequestStatus st) = vault.requestPayment(id, recipient, 1e6, string(p));
         assertEq(uint8(st), uint8(EXECUTED));
     }
 
@@ -111,7 +111,7 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         vm.prank(owner2);
         vault.registerAgent("B", newWallet, _policy(), _recips());
         vm.prank(newWallet);
-        vm.expectRevert(NexoraVault.NotAgentWallet.selector);
+        vm.expectRevert(NazvexVault.NotAgentWallet.selector);
         vault.requestPayment(id, recipient, 1e6, "");
     }
 
@@ -120,65 +120,65 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         uint256 id = _registerFunded(100e6);
         vm.prank(owner);
         vault.pauseAgent(id);
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.AgentNotActive);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.AgentNotActive);
     }
 
     function test_Block_AgentRevoked() public {
         uint256 id = _registerFunded(100e6);
         vm.prank(owner);
         vault.revokeAgent(id);
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.AgentNotActive);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.AgentNotActive);
     }
 
     function test_Block_BudgetExpired() public {
         vm.prank(owner);
         uint256 id =
-            vault.registerAgent("A", agentWallet, NexoraVault.Policy(MAX_TX, DAILY, THRESHOLD, uint64(T0 + 1 hours)), _recips());
+            vault.registerAgent("A", agentWallet, NazvexVault.Policy(MAX_TX, DAILY, THRESHOLD, uint64(T0 + 1 hours)), _recips());
         vm.prank(owner);
         vault.fundAgent(id, 100e6);
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 1e6); // before expiry executes
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 1e6); // before expiry executes
         assertEq(uint8(st), uint8(EXECUTED));
         vm.warp(T0 + 1 hours - 1);
         (, st) = _req(id, recipient, 1e6);
         assertEq(uint8(st), uint8(EXECUTED));
         vm.warp(T0 + 1 hours); // exactly at expiry -> expired
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.BudgetExpired);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.BudgetExpired);
     }
 
     function test_Block_ExceedsPerTx() public {
         uint256 id = _registerFunded(100e6);
-        _assertBlocked(id, recipient, MAX_TX + 1, NexoraVault.BlockReason.ExceedsPerTxLimit);
+        _assertBlocked(id, recipient, MAX_TX + 1, NazvexVault.BlockReason.ExceedsPerTxLimit);
     }
 
     function test_Block_ExceedsDaily() public {
         uint256 id = _registerFunded(100e6);
         _req(id, recipient, 7e6);
         _req(id, recipient, 7e6);
-        _assertBlocked(id, recipient, 7e6, NexoraVault.BlockReason.ExceedsDailyLimit);
+        _assertBlocked(id, recipient, 7e6, NazvexVault.BlockReason.ExceedsDailyLimit);
         // exact fill is allowed
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 6e6);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 6e6);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(vault.getAgent(id).remainingToday, 0);
-        _assertBlocked(id, recipient, 1, NexoraVault.BlockReason.ExceedsDailyLimit);
+        _assertBlocked(id, recipient, 1, NazvexVault.BlockReason.ExceedsDailyLimit);
     }
 
     function test_Block_RecipientNotAllowed() public {
         uint256 id = _registerFunded(100e6);
-        _assertBlocked(id, recipient2, 1e6, NexoraVault.BlockReason.RecipientNotAllowed);
+        _assertBlocked(id, recipient2, 1e6, NazvexVault.BlockReason.RecipientNotAllowed);
     }
 
     function test_Block_RemovedRecipient() public {
         uint256 id = _registerFunded(100e6);
         vm.prank(owner);
         vault.removeRecipient(id, recipient);
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.RecipientNotAllowed);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.RecipientNotAllowed);
     }
 
     function test_Block_InsufficientBalance() public {
         uint256 id = _registerFunded(3e6);
-        _assertBlocked(id, recipient, 5e6, NexoraVault.BlockReason.InsufficientBalance);
+        _assertBlocked(id, recipient, 5e6, NazvexVault.BlockReason.InsufficientBalance);
         // balance exactly equal succeeds
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 3e6);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 3e6);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(vault.getAgent(id).balance, 0);
     }
@@ -186,12 +186,12 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
     function test_Block_PrecedenceOrder() public {
         // inactive > perTx > recipient > balance
         uint256 id = _register(); // unfunded
-        _assertBlocked(id, recipient2, MAX_TX + 1, NexoraVault.BlockReason.ExceedsPerTxLimit);
-        _assertBlocked(id, recipient2, 1e6, NexoraVault.BlockReason.RecipientNotAllowed);
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.InsufficientBalance);
+        _assertBlocked(id, recipient2, MAX_TX + 1, NazvexVault.BlockReason.ExceedsPerTxLimit);
+        _assertBlocked(id, recipient2, 1e6, NazvexVault.BlockReason.RecipientNotAllowed);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.InsufficientBalance);
         vm.prank(owner);
         vault.pauseAgent(id);
-        _assertBlocked(id, recipient2, MAX_TX + 1, NexoraVault.BlockReason.AgentNotActive);
+        _assertBlocked(id, recipient2, MAX_TX + 1, NazvexVault.BlockReason.AgentNotActive);
     }
 
     function test_Block_ReducedDailyLimitBelowSpent() public {
@@ -199,14 +199,14 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         _req(id, recipient, 7e6);
         _req(id, recipient, 7e6); // spent 14
         vm.prank(owner);
-        vault.setPolicy(id, NexoraVault.Policy(10e6, 10e6, 8e6, 0)); // daily 10 < spent 14
+        vault.setPolicy(id, NazvexVault.Policy(10e6, 10e6, 8e6, 0)); // daily 10 < spent 14
         assertEq(vault.getAgent(id).remainingToday, 0);
-        _assertBlocked(id, recipient, 1, NexoraVault.BlockReason.ExceedsDailyLimit);
+        _assertBlocked(id, recipient, 1, NazvexVault.BlockReason.ExceedsDailyLimit);
     }
 
     function test_Block_DoesNotCountTowardsDailyOrCreateFunds() public {
         uint256 id = _registerFunded(100e6);
-        _assertBlocked(id, recipient2, 5e6, NexoraVault.BlockReason.RecipientNotAllowed);
+        _assertBlocked(id, recipient2, 5e6, NazvexVault.BlockReason.RecipientNotAllowed);
         assertEq(vault.getAgent(id).spentToday, 0);
         assertEq(vault.getAgent(id).totalSpent, 0);
     }
@@ -219,14 +219,14 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         _req(id, recipient, 6e6); // 20 == limit
         uint256 nextDay = (block.timestamp / 1 days + 1) * 1 days;
         vm.warp(nextDay - 1);
-        _assertBlocked(id, recipient, 1e6, NexoraVault.BlockReason.ExceedsDailyLimit);
+        _assertBlocked(id, recipient, 1e6, NazvexVault.BlockReason.ExceedsDailyLimit);
         assertEq(vault.getAgent(id).spentToday, 20e6);
 
         vm.warp(nextDay);
-        NexoraVault.AgentView memory a = vault.getAgent(id);
+        NazvexVault.AgentView memory a = vault.getAgent(id);
         assertEq(a.spentToday, 0); // view reflects new day lazily
         assertEq(a.remainingToday, DAILY);
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 7e6);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 7e6);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(vault.getAgent(id).spentToday, 7e6);
         assertEq(vault.getAgent(id).totalSpent, 27e6);
@@ -240,7 +240,7 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         _req(id, recipient, 7e6);
         _req(id, recipient, 6e6);
         vm.warp(block.timestamp + 20); // 10 seconds into next day
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 7e6);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 7e6);
         assertEq(uint8(st), uint8(EXECUTED));
     }
 
@@ -249,16 +249,16 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         _req(id, recipient, 7e6);
         vm.warp(T0 + 10 days);
         assertEq(vault.getAgent(id).spentToday, 0);
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 7e6);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 7e6);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(vault.getAgent(id).spentToday, 7e6);
     }
 
     // ---------------------------------------------------------------- previewPayment
     function _assertPreviewMatches(uint256 id, address to, uint256 amt) internal {
-        (NexoraVault.BlockReason reason, bool needsApproval) = vault.previewPayment(id, to, amt);
-        (uint256 reqId, NexoraVault.RequestStatus st) = _req(id, to, amt);
-        if (reason != NexoraVault.BlockReason.None) {
+        (NazvexVault.BlockReason reason, bool needsApproval) = vault.previewPayment(id, to, amt);
+        (uint256 reqId, NazvexVault.RequestStatus st) = _req(id, to, amt);
+        if (reason != NazvexVault.BlockReason.None) {
             assertEq(uint8(st), uint8(BLOCKED));
             assertEq(uint8(_reason(reqId)), uint8(reason));
             assertFalse(needsApproval);
@@ -288,14 +288,14 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
 
     function test_Preview_ReportsEachState() public {
         uint256 id = _registerFunded(100e6);
-        (NexoraVault.BlockReason r, bool n) = vault.previewPayment(id, recipient, 5e6);
+        (NazvexVault.BlockReason r, bool n) = vault.previewPayment(id, recipient, 5e6);
         assertEq(uint8(r), 0);
         assertFalse(n);
         (r, n) = vault.previewPayment(id, recipient, 9e6);
         assertEq(uint8(r), 0);
         assertTrue(n);
         (r, n) = vault.previewPayment(id, recipient, 11e6);
-        assertEq(uint8(r), uint8(NexoraVault.BlockReason.ExceedsPerTxLimit));
+        assertEq(uint8(r), uint8(NazvexVault.BlockReason.ExceedsPerTxLimit));
         assertFalse(n);
         // preview does not change state
         assertEq(vault.requestCount(), 0);
@@ -337,24 +337,24 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
     // ---------------------------------------------------------------- demo scenarios
     function test_Demo_5UsdcWithinLimitsExecutes() public {
         uint256 id = _registerFunded(100e6);
-        (, NexoraVault.RequestStatus st) = _req(id, recipient, 5 * U);
+        (, NazvexVault.RequestStatus st) = _req(id, recipient, 5 * U);
         assertEq(uint8(st), uint8(EXECUTED));
         assertEq(usdc.balanceOf(recipient), 5 * U);
     }
 
     function test_Demo_15UsdcWithMax10Blocked() public {
         uint256 id = _registerFunded(100e6);
-        _assertBlocked(id, recipient, 15 * U, NexoraVault.BlockReason.ExceedsPerTxLimit);
+        _assertBlocked(id, recipient, 15 * U, NazvexVault.BlockReason.ExceedsPerTxLimit);
     }
 
     function test_Demo_UnlistedRecipientBlocked() public {
         uint256 id = _registerFunded(100e6);
-        _assertBlocked(id, stranger, 5 * U, NexoraVault.BlockReason.RecipientNotAllowed);
+        _assertBlocked(id, stranger, 5 * U, NazvexVault.BlockReason.RecipientNotAllowed);
     }
 
     function test_Demo_AboveThresholdStaysPending() public {
         uint256 id = _registerFunded(100e6);
-        (uint256 reqId, NexoraVault.RequestStatus st) = _req(id, recipient, 9 * U);
+        (uint256 reqId, NazvexVault.RequestStatus st) = _req(id, recipient, 9 * U);
         assertEq(uint8(st), uint8(PENDING));
         assertEq(usdc.balanceOf(recipient), 0);
         assertEq(vault.getAgent(id).balance, 100e6);
@@ -365,12 +365,12 @@ contract NexoraVaultPaymentsTest is NexoraVaultTestBase {
         uint256 id = _registerFunded(100e6);
         vm.prank(owner);
         vault.revokeAgent(id);
-        _assertBlocked(id, recipient, 5 * U, NexoraVault.BlockReason.AgentNotActive);
+        _assertBlocked(id, recipient, 5 * U, NazvexVault.BlockReason.AgentNotActive);
     }
 
     function test_Demo_InsufficientBalanceNoFalseSuccess() public {
         uint256 id = _registerFunded(2 * U);
-        uint256 reqId = _assertBlocked(id, recipient, 5 * U, NexoraVault.BlockReason.InsufficientBalance);
+        uint256 reqId = _assertBlocked(id, recipient, 5 * U, NazvexVault.BlockReason.InsufficientBalance);
         assertTrue(_status(reqId) != EXECUTED);
         assertEq(usdc.balanceOf(recipient), 0);
         assertEq(vault.getAgent(id).balance, 2 * U);

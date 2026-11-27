@@ -22,7 +22,7 @@ This guide uses the agent client in `scripts/agent-request.ts`. It works on Arc 
 export AGENT_PRIVATE_KEY=0x...   # the agent wallet's key
 ```
 
-The vault address is read from `VITE_NEXORA_VAULT_ADDRESS`, which is already set in `.env` and `.env.production`. Set `AGENT_RPC_URL` only if you want a different RPC endpoint.
+The vault address is read from `VITE_NAZVEX_VAULT_ADDRESS`, which is already set in `.env` and `.env.production`. Set `AGENT_RPC_URL` only if you want a different RPC endpoint.
 
 ## Commands
 

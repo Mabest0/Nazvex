@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { isAddress, type Address } from 'viem'
 import { Lock, Plus, SlidersHorizontal, Trash2 } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { useTx } from '@/hooks/useTx'
 import { fmtDate, nowSec, sameAddr } from '@/lib/format'
 import { formatUnitsExact, parseUsdc } from '@/onchain-money'
@@ -50,7 +50,7 @@ function PolicyForm({ agent }: { agent: Agent }) {
     void tx.run('Update policy', () =>
       tx.write({
         address: VAULT_ADDRESS,
-        abi: nexoraVaultAbi,
+        abi: nazvexVaultAbi,
         functionName: 'setPolicy',
         args: [agent.id, { maxPerTx: maxRaw, dailyLimit: dailyRaw, approvalThreshold: thresholdRaw, expiresAt }],
       }),
@@ -94,13 +94,13 @@ function Allowlist({ agent, recipients }: { agent: Agent; recipients: Address[] 
   const add = async () => {
     if (!valid) return
     const done = await tx.run('Add recipient', () =>
-      tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'addRecipient', args: [agent.id, input] }),
+      tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'addRecipient', args: [agent.id, input] }),
     )
     if (done) setInput('')
   }
   const remove = (r: Address) =>
     tx.run('Remove recipient', () =>
-      tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'removeRecipient', args: [agent.id, r] }),
+      tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'removeRecipient', args: [agent.id, r] }),
     )
 
   return (
@@ -141,7 +141,7 @@ function WalletRotation({ agent }: { agent: Agent }) {
           type="button"
           className="btn btn-ghost"
           disabled={!valid || tx.busy}
-          onClick={() => void tx.run('Rotate agent wallet', () => tx.write({ address: VAULT_ADDRESS, abi: nexoraVaultAbi, functionName: 'setAgentWallet', args: [agent.id, wallet as Address] })).then((r) => r && setWallet(''))}
+          onClick={() => void tx.run('Rotate agent wallet', () => tx.write({ address: VAULT_ADDRESS, abi: nazvexVaultAbi, functionName: 'setAgentWallet', args: [agent.id, wallet as Address] })).then((r) => r && setWallet(''))}
         >
           Update
         </button>
@@ -151,7 +151,7 @@ function WalletRotation({ agent }: { agent: Agent }) {
 }
 
 export function Controls({ go, focusAgent }: NavProps) {
-  const { agents, recipients } = useNexora()
+  const { agents, recipients } = useNazvex()
   const [selected, setSelected] = useState<bigint | undefined>(focusAgent)
 
   const agent = agents.find((a) => a.id === selected) ?? agents[0]

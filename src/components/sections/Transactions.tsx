@@ -4,8 +4,8 @@ import { useReadContract } from 'wagmi'
 import { toast } from 'sonner'
 import { Check, ReceiptText, Send, ShieldX, Hourglass } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { nexoraVaultAbi } from '@/contracts/nexoraVaultAbi'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { nazvexVaultAbi } from '@/contracts/nazvexVaultAbi'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { paymentOutcome, useTx } from '@/hooks/useTx'
 import { fmtUsdc, sameAddr, shortAddr, timeAgo } from '@/lib/format'
 import { parseUsdc } from '@/onchain-money'
@@ -30,7 +30,7 @@ function safeParse(v: string): bigint | null {
 }
 
 function RequestForm({ focusAgent }: { focusAgent?: bigint }) {
-  const { agents, recipients, address } = useNexora()
+  const { agents, recipients, address } = useNazvex()
   const tx = useTx()
   const [agentId, setAgentId] = useState<bigint | undefined>(focusAgent)
   const [to, setTo] = useState('')
@@ -44,7 +44,7 @@ function RequestForm({ focusAgent }: { focusAgent?: bigint }) {
 
   const preview = useReadContract({
     address: VAULT_ADDRESS,
-    abi: nexoraVaultAbi,
+    abi: nazvexVaultAbi,
     chainId: CHAIN_ID,
     functionName: 'previewPayment',
     args: ready && agent && raw ? [agent.id, to, raw] : undefined,
@@ -58,7 +58,7 @@ function RequestForm({ focusAgent }: { focusAgent?: bigint }) {
     const result = await tx.run('Payment request', () =>
       tx.write({
         address: VAULT_ADDRESS,
-        abi: nexoraVaultAbi,
+        abi: nazvexVaultAbi,
         functionName: 'requestPayment',
         args: [agent.id, to, raw, purpose.trim()],
       }),
@@ -128,7 +128,7 @@ function RequestForm({ focusAgent }: { focusAgent?: bigint }) {
 }
 
 export function Transactions({ go, focusAgent }: NavProps) {
-  const { agents, requests, now } = useNexora()
+  const { agents, requests, now } = useNazvex()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All')
 
   const rows = useMemo(

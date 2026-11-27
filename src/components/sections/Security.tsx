@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { AlertTriangle, Info, OctagonAlert, ShieldCheck } from 'lucide-react'
 import type { NavProps } from '@/App'
-import { useNexora } from '@/hooks/NexoraProvider'
+import { useNazvex } from '@/hooks/NazvexProvider'
 import { timeAgo } from '@/lib/format'
 import { computeAlerts, THRESHOLDS, type Severity } from '@/lib/monitoring'
 import { AgentStatusPill, ConnectGate, Empty, PageHeader } from '../ui'
@@ -13,7 +13,7 @@ const TONE: Record<Severity, { color: string; icon: typeof Info; label: string }
 }
 
 export function Security({ go }: NavProps) {
-  const { agents, requests, now } = useNexora()
+  const { agents, requests, now } = useNazvex()
   const alerts = useMemo(() => computeAlerts(agents, requests, now), [agents, requests, now])
 
   return (
