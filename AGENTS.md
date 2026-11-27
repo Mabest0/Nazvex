@@ -47,6 +47,8 @@ bun run dev
 
 - NexoraVault (contract name kept as deployed; the product is Nazvex) (Arc Testnet, chain 5042002): `0x81706229562ddbace8d475ad3f8fdc22c05e4a04`
   - Deploy tx: `0xde55764de8a60db6a8877ca82c075464d016e5f69b2eb16ee8d57fe6c51949c9`
+  - Verified on the Arc Testnet explorer (https://explorer.testnet.arc.io; testnet.arcscan.app redirects there). Source: contracts/NexoraVault.sol, solc 0.8.28, optimizer 200 runs, evm cancun.
+  - Created by smart account `0xa3039A54856ed74B5AEc999EeF3fc954Ab010Cf6` (platform deployer, via ERC-4337 EntryPoint `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`). No factory used.
   - Constructor arg: USDC `0x3600000000000000000000000000000000000000`
   - Address lives in `.env` as `VITE_NEXORA_VAULT_ADDRESS`; ABI in `src/contracts/nexoraVaultAbi.ts` (regenerate from `contracts/out/NexoraVault.sol/NexoraVault.json` after contract changes).
 
