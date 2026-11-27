@@ -1,0 +1,7 @@
+# Local secrets and machine-specific settings. Never commit these.
+.env
+.env.local
+.env.*.local
+
+# Agent client state
+.nazvex/
